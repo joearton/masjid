@@ -1,0 +1,61 @@
+{% extends "base/public.html" %}
+{% load i18n hijri_tags %}
+
+{% block title %}{{ object.judul }} — {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-header-title">{{ object.judul }}</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">{% trans "Beranda" %}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'berita:list' %}">{% trans "Berita" %}</a></li>
+                <li class="breadcrumb-item active">{{ object.judul|truncatechars:40 }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <article class="card border-0 shadow-sm">
+                {% if object.gambar %}
+                <img src="{{ object.gambar.url }}" class="card-img-top" alt="{{ object.judul }}" style="max-height:400px;object-fit:cover">
+                {% endif %}
+                <div class="card-body p-4 p-lg-5">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        {% if object.is_pengumuman %}<span class="badge bg-danger">{% trans "Pengumuman" %}</span>{% endif %}
+                        {% if object.kategori %}<span class="badge bg-warning text-dark">{{ object.kategori.nama }}</span>{% endif %}
+                    </div>
+                    <h1 class="h3 fw-bold mb-3">{{ object.judul }}</h1>
+                    <div class="d-flex gap-3 text-muted small mb-4">
+                        <span><i class="bi bi-clock me-1"></i>{{ object.created_at|date:"d F Y, H:i" }}</span>
+                        <span><i class="bi bi-moon-stars me-1"></i>{{ object.created_at|hijri }}</span>
+                    </div>
+                    <div class="article-content">
+                        {{ object.isi|linebreaks }}
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <div class="col-lg-4">
+            {% if berita_terkait %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-bold border-bottom">{% trans "Berita Terkait" %}</div>
+                <div class="list-group list-group-flush">
+                    {% for b in berita_terkait %}
+                    <a href="{% url 'berita:detail' b.slug %}" class="list-group-item list-group-item-action py-3">
+                        <div class="fw-semibold small">{{ b.judul }}</div>
+                        <div class="text-muted" style="font-size:0.75rem">{{ b.created_at|date:"d M Y" }} · {{ b.created_at|hijri_short }}</div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

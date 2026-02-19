@@ -1,0 +1,100 @@
+{% extends "base/public.html" %}
+{% load i18n hijri_tags %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-header-title">{% trans "Kegiatan & Agenda" %}</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">{% trans "Beranda" %}</a></li>
+                <li class="breadcrumb-item active">{% trans "Kegiatan" %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container py-5">
+    <!-- Filter -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a href="{% url 'kegiatan:list' %}" class="btn btn-sm {% if not request.GET.status %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            {% trans "Semua" %}
+        </a>
+        <a href="?status=upcoming" class="btn btn-sm {% if request.GET.status == 'upcoming' %}btn-success{% else %}btn-outline-success{% endif %}">
+            {% trans "Akan Datang" %}
+        </a>
+        <a href="?status=ongoing" class="btn btn-sm {% if request.GET.status == 'ongoing' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+            {% trans "Berlangsung" %}
+        </a>
+        <a href="?status=done" class="btn btn-sm {% if request.GET.status == 'done' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+            {% trans "Selesai" %}
+        </a>
+    </div>
+
+    {% if kegiatan_list %}
+    <div class="row g-4">
+        {% for kegiatan in kegiatan_list %}
+        <div class="col-md-6 col-lg-4">
+            <a href="{% url 'kegiatan:detail' kegiatan.pk %}" class="card-link">
+                <div class="card kegiatan-card h-100 border-0 shadow-sm">
+                    {% if kegiatan.gambar %}
+                    <img src="{{ kegiatan.gambar.url }}" class="card-img-top" alt="{{ kegiatan.judul }}" style="height:180px;object-fit:cover">
+                    {% else %}
+                    <div class="card-img-placeholder bg-light d-flex align-items-center justify-content-center" style="height:180px">
+                        <i class="bi bi-calendar-event display-4 text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-primary-subtle text-primary">
+                                <i class="bi bi-calendar3 me-1"></i>{{ kegiatan.tanggal|date:"d M Y" }} · {{ kegiatan.tanggal|hijri_short }}
+                            </span>
+                            <span class="badge
+                                {% if kegiatan.status == 'upcoming' %}bg-success
+                                {% elif kegiatan.status == 'ongoing' %}bg-warning text-dark
+                                {% elif kegiatan.status == 'done' %}bg-secondary
+                                {% else %}bg-danger{% endif %}">
+                                {{ kegiatan.get_status_display }}
+                            </span>
+                        </div>
+                        <h6 class="card-title fw-bold">{{ kegiatan.judul }}</h6>
+                        <p class="card-text text-muted small mb-1">
+                            <i class="bi bi-clock me-1"></i>{{ kegiatan.waktu_mulai|time:"H:i" }}
+                            {% if kegiatan.waktu_selesai %} - {{ kegiatan.waktu_selesai|time:"H:i" }}{% endif %}
+                        </p>
+                        <p class="card-text text-muted small">
+                            <i class="bi bi-geo-alt me-1"></i>{{ kegiatan.tempat }}
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}"><i class="bi bi-chevron-left"></i></a></li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="bi bi-chevron-right"></i></a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state text-center py-5">
+        <i class="bi bi-calendar-x display-4 text-muted"></i>
+        <p class="text-muted mt-3">{% trans "Belum ada kegiatan." %}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

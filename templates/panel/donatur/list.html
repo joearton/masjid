@@ -1,0 +1,97 @@
+{% extends "base/panel.html" %}
+{% load i18n humanize %}
+
+{% block panel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h4 class="fw-bold mb-1">{{ page_title }}</h4></div>
+    <div class="d-flex gap-2">
+        {% if back_url %}
+        <a href="{{ back_url }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>{% trans "Kembali" %}
+        </a>
+        {% endif %}
+        {% if create_url %}
+        <a href="{{ create_url }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>{% trans "Tambah Donatur" %}
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Search -->
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body py-2 px-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="{% trans 'Cari donatur...' %}" value="{{ search_query }}">
+                </div>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-funnel me-1"></i>{% trans "Cari" %}</button>
+                {% if search_query %}
+                <a href="{% url 'donatur:panel_list' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>{% trans "Nama Donatur" %}</th>
+                    <th>{% trans "Tipe" %}</th>
+                    <th>{% trans "Kontak" %}</th>
+                    <th>{% trans "Komitmen Rutin" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th class="text-end">{% trans "Aksi" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for obj in object_list %}
+                <tr>
+                    <td class="fw-semibold">{{ obj.nama }}</td>
+                    <td>
+                        {% if obj.tipe == 'tetap' %}
+                        <span class="badge bg-primary">{% trans "Tetap" %}</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{% trans "Tidak Tetap" %}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if obj.telepon %}<div class="small"><i class="bi bi-telephone me-1"></i>{{ obj.telepon }}</div>{% endif %}
+                        {% if obj.alamat %}<div class="small text-muted text-truncate" style="max-width: 200px;"><i class="bi bi-geo-alt me-1"></i>{{ obj.alamat }}</div>{% endif %}
+                    </td>
+                    <td>
+                        {% if obj.tipe == 'tetap' and obj.komitmen_rutin > 0 %}
+                        <div class="fw-bold text-success">Rp {{ obj.komitmen_rutin|intcomma }}</div>
+                        <small class="text-muted">/ {{ obj.get_tipe_rutin_display }}</small>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if obj.status == 'aktif' %}
+                        <span class="badge bg-success">{% trans "Aktif" %}</span>
+                        {% else %}
+                        <span class="badge bg-danger">{% trans "Nonaktif" %}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'donatur:panel_edit' obj.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'donatur:panel_delete' obj.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted py-4">{% trans "Belum ada data donatur." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "panel/includes/_pagination.html" %}
+</div>
+{% endblock %}

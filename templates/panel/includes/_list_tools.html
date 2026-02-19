@@ -1,0 +1,36 @@
+{% load i18n %}
+{# Reusable search bar + filter + pagination for all panel list pages #}
+{# Expected context: request, filter_fields (optional list of dicts), is_paginated, page_obj #}
+
+<!-- Search & Filter Bar -->
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body py-2 px-3">
+        <form method="get" class="row g-2 align-items-end">
+            <!-- Search -->
+            <div class="col-lg{% if filter_fields %}-4{% endif %}">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="{% trans 'Cari...' %}" value="{{ request.GET.q|default:'' }}">
+                </div>
+            </div>
+            {% if filter_fields %}
+            {% for f in filter_fields %}
+            <div class="col-auto">
+                <select name="{{ f.name }}" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">{{ f.label }}</option>
+                    {% for val, display in f.choices %}
+                    <option value="{{ val }}" {% if request.GET|default_if_none:"" %}{% with fval=f.name %}{% if request.GET|dictsort:fval %}{% endif %}{% endwith %}{% endif %}{% if val == selected_filters|default_if_none:"" %}selected{% endif %}>{{ display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endfor %}
+            {% endif %}
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-funnel me-1"></i>{% trans "Filter" %}</button>
+                {% if request.GET.q or request.GET.jenis or request.GET.status or request.GET.kategori %}
+                <a href="{{ request.path }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>

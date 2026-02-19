@@ -1,0 +1,104 @@
+{% extends "base/panel.html" %}
+{% load i18n %}
+
+{% block panel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">{{ page_title }}</h4>
+    </div>
+    <div class="d-grid d-md-flex gap-2">
+        {% if create_url %}
+        <a href="{{ create_url }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>{% trans "Tambah Manual / Override" %}
+        </a>
+        {% endif %}
+        <a href="{% url 'sholat:panel_jumat_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-moon-stars me-1"></i>{% trans "Jadwal Jumat" %}
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Jadwal Manual (Database) -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="card-title mb-0 fw-bold text-primary">
+                    <i class="bi bi-pencil-square me-2"></i>{% trans "Jadwal Manual (Override)" %}
+                </h5>
+                <small class="text-muted">{% trans "Data di sini akan MENIMPA jadwal otomatis." %}</small>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>{% trans "Tanggal" %}</th>
+                            <th>{% trans "Subuh" %}</th>
+                            <th>{% trans "Maghrib" %}</th>
+                            <th class="text-end">{% trans "Aksi" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for j in object_list %}
+                        <tr>
+                            <td class="fw-semibold">{{ j.tanggal|date:"d/m" }}</td>
+                            <td>{{ j.subuh|time:"H:i" }}</td>
+                            <td>{{ j.maghrib|time:"H:i" }}</td>
+                            <td class="text-end">
+                                <a href="{% url 'sholat:panel_edit' j.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                <a href="{% url 'sholat:panel_delete' j.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center text-muted py-4 small">{% trans "Tidak ada jadwal manual (menggunakan otomatis)." %}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jadwal Otomatis (Calculation) -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100 border-0 shadow-sm bg-light">
+            <div class="card-header bg-transparent py-3">
+                <h5 class="card-title mb-0 fw-bold text-success">
+                    <i class="bi bi-robot me-2"></i>{% trans "Jadwal Otomatis AdhanPy" %}
+                </h5>
+                <small class="text-muted">{{ bulan_ini }} - Berdasarkan Lokasi Masjid</small>
+            </div>
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-sm table-borderless mb-0">
+                    <thead class="text-muted small">
+                        <tr>
+                            <th>Tgl</th>
+                            <th>Subuh</th>
+                            <th>Dzuhur</th>
+                            <th>Ashar</th>
+                            <th>Maghrib</th>
+                            <th>Isya</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for j in jadwal_otomatis %}
+                        <tr>
+                            <td>{{ j.tanggal|date:"d" }}</td>
+                            <td>{{ j.subuh|date:"H:i" }}</td>
+                            <td>{{ j.dzuhur|date:"H:i" }}</td>
+                            <td>{{ j.ashar|date:"H:i" }}</td>
+                            <td>{{ j.maghrib|date:"H:i" }}</td>
+                            <td>{{ j.isya|date:"H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-transparent py-2">
+                <small class="text-muted fst-italic">
+                    * Waktu sholat dihitung otomatis. Input manual di sebelah kiri hanya diperlukan jika ingin mengubah waktu pada tanggal tertentu (misal: Imsakiyah Ramadhan).
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% load i18n %}
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top" id="mainNavbar">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'core:home' %}">
+            {% if site_setting and site_setting.tampilkan_logo and site_setting.logo %}
+                <img src="{{ site_setting.logo.url }}" alt="{{ SITE_NAME }}" style="height:36px;width:auto;">
+            {% else %}
+                <i class="bi bi-building fs-4 text-warning"></i>
+            {% endif %}
+            <div>
+                <div class="fw-bold">{{ SITE_NAME }}</div>
+                <div class="navbar-tagline">{{ SITE_TAGLINE }}</div>
+            </div>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.namespace == 'core' %}active{% endif %}"
+                       href="{% url 'core:home' %}">
+                        <i class="bi bi-house me-1"></i>{% trans "Beranda" %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.namespace == 'profil' %}active{% endif %}"
+                       href="{% url 'profil:index' %}">
+                        <i class="bi bi-info-circle me-1"></i>{% trans "Profil" %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.namespace == 'sholat' %}active{% endif %}"
+                       href="{% url 'sholat:index' %}">
+                        <i class="bi bi-clock me-1"></i>{% trans "Jadwal Sholat" %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.namespace == 'kegiatan' %}active{% endif %}"
+                       href="{% url 'kegiatan:list' %}">
+                        <i class="bi bi-calendar-event me-1"></i>{% trans "Kegiatan" %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.namespace == 'berita' %}active{% endif %}"
+                       href="{% url 'berita:list' %}">
+                        <i class="bi bi-newspaper me-1"></i>{% trans "Berita" %}
+                    </a>
+                </li>
+                {% if not site_setting or site_setting.tampilkan_keuangan %}
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.namespace == 'keuangan' %}active{% endif %}"
+                       href="{% url 'keuangan:index' %}">
+                        <i class="bi bi-wallet2 me-1"></i>{% trans "Keuangan" %}
+                    </a>
+                </li>
+                {% endif %}
+                {% if user.is_authenticated %}
+                <li class="nav-item ms-lg-2">
+                    <a class="btn btn-warning btn-sm px-3" href="{% url 'panel:dashboard' %}">
+                        <i class="bi bi-speedometer2 me-1"></i>{% trans "Panel" %}
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

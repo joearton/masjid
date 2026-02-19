@@ -1,0 +1,152 @@
+{% extends "base/panel.html" %}
+{% load i18n humanize %}
+
+{% block panel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h4 class="fw-bold mb-1">{{ page_title }}</h4></div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'keuangan:panel_report' %}" class="btn btn-outline-info">
+            <i class="bi bi-bar-chart-line me-1"></i>{% trans "Report" %}
+        </a>
+        <a href="{% url 'keuangan:panel_kategori_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-tags me-1"></i>{% trans "Kategori" %}
+        </a>
+        {% if create_url %}
+        <a href="{{ create_url }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>{% trans "Tambah Transaksi" %}
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-success-subtle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                        <i class="bi bi-arrow-down-circle text-success fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{% trans "Total Pemasukan" %}</div>
+                        <div class="fs-5 fw-bold text-success">Rp {{ total_masuk|intcomma }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-danger-subtle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                        <i class="bi bi-arrow-up-circle text-danger fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{% trans "Total Pengeluaran" %}</div>
+                        <div class="fs-5 fw-bold text-danger">Rp {{ total_keluar|intcomma }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                        <i class="bi bi-wallet2 text-primary fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">{% trans "Saldo" %}</div>
+                        <div class="fs-5 fw-bold text-primary">Rp {{ saldo|intcomma }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Filters -->
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body py-2 px-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="{% trans 'Cari keterangan...' %}" value="{{ search_query }}">
+                </div>
+            </div>
+            <div class="col-auto">
+                <select name="tahun" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">{% trans "Semua Tahun" %}</option>
+                    {% for y in year_list %}
+                    <option value="{{ y }}" {% if selected_tahun == y|stringformat:"d" %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <select name="bulan" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">{% trans "Semua Bulan" %}</option>
+                    {% for val, label in bulan_choices %}
+                    <option value="{{ val }}" {% if selected_bulan == val|stringformat:"d" %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <select name="jenis" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">{% trans "Semua Jenis" %}</option>
+                    <option value="pemasukan" {% if selected_jenis == 'pemasukan' %}selected{% endif %}>{% trans "Pemasukan" %}</option>
+                    <option value="pengeluaran" {% if selected_jenis == 'pengeluaran' %}selected{% endif %}>{% trans "Pengeluaran" %}</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-funnel me-1"></i>{% trans "Filter" %}</button>
+                {% if search_query or selected_jenis or selected_tahun or selected_bulan %}
+                <a href="{% url 'keuangan:panel_list' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x-lg"></i></a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>{% trans "Tanggal" %}</th>
+                    <th>{% trans "Keterangan" %}</th>
+                    <th>{% trans "Kategori" %}</th>
+                    <th class="text-end">{% trans "Jumlah" %}</th>
+                    <th class="text-end">{% trans "Aksi" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in object_list %}
+                <tr>
+                    <td class="text-nowrap">{{ t.tanggal|date:"d M Y" }}</td>
+                    <td>{{ t.keterangan|truncatechars:60 }}</td>
+                    <td>
+                        <span class="badge {% if t.kategori.jenis == 'pemasukan' %}bg-success{% else %}bg-danger{% endif %}-subtle {% if t.kategori.jenis == 'pemasukan' %}text-success{% else %}text-danger{% endif %}">
+                            {{ t.kategori.nama }}
+                        </span>
+                    </td>
+                    <td class="text-end fw-semibold {% if t.kategori.jenis == 'pemasukan' %}text-success{% else %}text-danger{% endif %}">
+                        Rp {{ t.jumlah|intcomma }}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'keuangan:panel_edit' t.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'keuangan:panel_delete' t.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-4">{% trans "Belum ada transaksi." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "panel/includes/_pagination.html" %}
+</div>
+{% endblock %}

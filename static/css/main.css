@@ -1,0 +1,396 @@
+/* ============================================================
+   MASJID WEBSITE — MAIN CSS
+   ============================================================ */
+
+/* ── Variables ─────────────────────────────────────────────── */
+:root {
+    --primary: #1a6b3c;
+    --primary-dark: #145530;
+    --primary-light: #e8f5ee;
+    --accent: #f0a500;
+    --text-dark: #1a1a2e;
+    --text-muted: #6c757d;
+    --bg-light: #f8f9fa;
+    --sidebar-width: 260px;
+    --sidebar-bg: #1a1a2e;
+    --topbar-height: 64px;
+    --border-radius: 12px;
+    --shadow: 0 2px 16px rgba(0,0,0,0.08);
+    --transition: all 0.25s ease;
+}
+
+/* ── Base ───────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-dark);
+    background: #fff;
+    line-height: 1.6;
+}
+
+/* ── Navbar ─────────────────────────────────────────────────── */
+#mainNavbar {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.15);
+    padding: 0.75rem 0;
+}
+
+#mainNavbar .navbar-brand { font-size: 1rem; }
+#mainNavbar .navbar-tagline { font-size: 0.65rem; opacity: 0.75; }
+
+#mainNavbar .nav-link {
+    color: rgba(255,255,255,0.85) !important;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+#mainNavbar .nav-link:hover,
+#mainNavbar .nav-link.active {
+    color: #fff !important;
+    background: rgba(255,255,255,0.15);
+}
+
+/* ── Hero Section ───────────────────────────────────────────── */
+.hero-section {
+    position: relative;
+    min-height: 85vh;
+    background: linear-gradient(135deg, var(--primary) 0%, #0d4a2a 50%, #1a1a2e 100%);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    padding: 4rem 0;
+}
+
+.hero-icon {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* ── Page Header ────────────────────────────────────────────── */
+.page-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 3rem 0 2rem;
+}
+
+.page-header-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.page-header .breadcrumb-item a { color: rgba(255,255,255,0.75); text-decoration: none; }
+.page-header .breadcrumb-item.active { color: rgba(255,255,255,0.9); }
+.page-header .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,0.5); }
+
+/* ── Section Titles ─────────────────────────────────────────── */
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    position: relative;
+    padding-bottom: 0.75rem;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 48px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+/* ── Cards ──────────────────────────────────────────────────── */
+.card {
+    border-radius: var(--border-radius) !important;
+    transition: var(--transition);
+}
+
+.card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.card-link:hover .card {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+}
+
+.card-img-placeholder {
+    height: 180px;
+    background: var(--bg-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+/* ── Sholat Time Cards ──────────────────────────────────────── */
+.sholat-time-card {
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.sholat-badge {
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+}
+
+/* ── Icon Box ───────────────────────────────────────────────── */
+.icon-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ── Footer ─────────────────────────────────────────────────── */
+.footer {
+    background: var(--sidebar-bg);
+    color: rgba(255,255,255,0.8);
+}
+
+.footer h5, .footer h6 { color: #fff; }
+
+/* Override Bootstrap text-muted agar terlihat di background gelap */
+.footer .text-muted,
+.footer p,
+.footer small {
+    color: rgba(255,255,255,0.6) !important;
+}
+
+.footer hr {
+    border-color: rgba(255,255,255,0.12);
+}
+
+.footer-links { margin: 0; padding: 0; }
+.footer-links li { margin-bottom: 0.5rem; }
+.footer-links a {
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: var(--transition);
+}
+.footer-links a:hover { color: var(--accent); }
+
+/* ── Article Content ────────────────────────────────────────── */
+.article-content {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #333;
+}
+
+/* ── Empty State ────────────────────────────────────────────── */
+.empty-state { padding: 3rem 0; }
+
+/* ── Bootstrap Overrides ────────────────────────────────────── */
+.btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+.btn-primary:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+.btn-outline-primary:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.badge { font-weight: 500; }
+
+/* ── PANEL LAYOUT ───────────────────────────────────────────── */
+.panel-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background: #f0f2f5;
+}
+
+/* ── Sidebar ────────────────────────────────────────────────── */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    height: 100vh; /* Changed from min-height to height to enforce flex container size */
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition);
+    overflow: hidden; /* Hide overflow on parent, let sidebar-body scroll */
+}
+
+.sidebar-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0; /* Prevent header from shrinking */
+}
+
+.sidebar-body {
+    padding: 1rem 0.75rem;
+    flex: 1;
+    overflow-y: auto; /* Enable vertical scrolling */
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+/* Custom Scrollbar */
+.sidebar-body::-webkit-scrollbar {
+    width: 6px;
+}
+.sidebar-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidebar-body::-webkit-scrollbar-thumb {
+    background-color: rgba(255,255,255,0.2);
+    border-radius: 20px;
+}
+
+.sidebar-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.35);
+    padding: 0 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: var(--transition);
+    margin-bottom: 0.15rem;
+}
+
+.sidebar-link:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+}
+
+.sidebar-link.active {
+    background: var(--primary);
+    color: #fff;
+}
+
+.sidebar-link i { font-size: 1rem; width: 20px; text-align: center; }
+
+/* ── Panel Main ─────────────────────────────────────────────── */
+.panel-main {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    transition: var(--transition);
+}
+
+/* ── Topbar ─────────────────────────────────────────────────── */
+.topbar {
+    height: var(--topbar-height);
+    background: #fff;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.topbar-breadcrumb { flex: 1; font-size: 0.875rem; }
+.topbar-right { margin-left: auto; }
+
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+/* ── Panel Content ──────────────────────────────────────────── */
+.panel-content {
+    padding: 1.5rem;
+    flex: 1;
+}
+
+/* ── Login Page ─────────────────────────────────────────────── */
+.login-page {
+    background: linear-gradient(135deg, var(--primary) 0%, #0d4a2a 50%, #1a1a2e 100%);
+    min-height: 100vh;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 1rem;
+}
+
+.login-icon {
+    animation: float 3s ease-in-out infinite;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 991.98px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    .panel-main {
+        margin-left: 0;
+    }
+}
+
+/* ── Utilities ──────────────────────────────────────────────── */
+.bg-primary-subtle { background-color: var(--primary-light) !important; }
+.text-primary { color: var(--primary) !important; }

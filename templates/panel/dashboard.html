@@ -1,0 +1,188 @@
+{% extends "base/panel.html" %}
+{% load i18n %}
+
+{% block panel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">{% trans "Dashboard" %}</h4>
+        <p class="text-muted mb-0">{% trans "Selamat datang di Panel Administrasi" %}, {{ user.get_full_name|default:user.username }}!</p>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3 p-4">
+                <div class="icon-box bg-primary-subtle text-primary rounded-3 p-3">
+                    <i class="bi bi-newspaper fs-4"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">{% trans "Total Berita" %}</div>
+                    <div class="fs-3 fw-bold">{{ total_berita }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3 p-4">
+                <div class="icon-box bg-success-subtle text-success rounded-3 p-3">
+                    <i class="bi bi-calendar-event fs-4"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">{% trans "Total Kegiatan" %}</div>
+                    <div class="fs-3 fw-bold">{{ total_kegiatan }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3 p-4">
+                <div class="icon-box bg-warning-subtle text-warning rounded-3 p-3">
+                    <i class="bi bi-calendar-check fs-4"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">{% trans "Kegiatan Mendatang" %}</div>
+                    <div class="fs-3 fw-bold">{{ kegiatan_mendatang|length }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3 p-4">
+                <div class="icon-box bg-danger-subtle text-danger rounded-3 p-3">
+                    <i class="bi bi-heart fs-4"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">{% trans "Donatur" %}</div>
+                    <div class="fs-3 fw-bold">{{ total_donatur }}</div>
+                    <small class="text-success">{{ total_donatur_tetap }} {% trans "Tetap" %}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Extra Stats Row -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center gap-3 p-4">
+                <div class="icon-box bg-info-subtle text-info rounded-3 p-3">
+                    <i class="bi bi-globe fs-4"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">{% trans "Website" %}</div>
+                    <a href="{% url 'core:home' %}" target="_blank" class="btn btn-sm btn-outline-info mt-1">
+                        {% trans "Lihat" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Access -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom fw-bold">
+                {% trans "Akses Cepat" %}
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <a href="{% url 'berita:panel_create' %}" class="btn btn-outline-primary w-100 d-flex flex-column align-items-center py-3 gap-2">
+                            <i class="bi bi-plus-circle fs-4"></i>
+                            <small>{% trans "Tambah Berita" %}</small>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <a href="{% url 'kegiatan:panel_create' %}" class="btn btn-outline-success w-100 d-flex flex-column align-items-center py-3 gap-2">
+                            <i class="bi bi-calendar-plus fs-4"></i>
+                            <small>{% trans "Tambah Kegiatan" %}</small>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <a href="{% url 'sholat:panel_settings' %}" class="btn btn-outline-warning w-100 d-flex flex-column align-items-center py-3 gap-2">
+                            <i class="bi bi-clock-history fs-4"></i>
+                            <small>{% trans "Pengaturan Sholat" %}</small>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <a href="{% url 'keuangan:panel_create' %}" class="btn btn-outline-info w-100 d-flex flex-column align-items-center py-3 gap-2">
+                            <i class="bi bi-cash-stack fs-4"></i>
+                            <small>{% trans "Tambah Transaksi" %}</small>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <a href="{% url 'profil:panel_profil' %}" class="btn btn-outline-secondary w-100 d-flex flex-column align-items-center py-3 gap-2">
+                            <i class="bi bi-building-gear fs-4"></i>
+                            <small>{% trans "Edit Profil" %}</small>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <a href="{% url 'profil:panel_pengurus_create' %}" class="btn btn-outline-dark w-100 d-flex flex-column align-items-center py-3 gap-2">
+                            <i class="bi bi-person-plus fs-4"></i>
+                            <small>{% trans "Tambah Pengurus" %}</small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Data -->
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <span class="fw-bold">{% trans "Kegiatan Mendatang" %}</span>
+                <a href="{% url 'kegiatan:panel_list' %}" class="btn btn-sm btn-outline-primary">{% trans "Lihat Semua" %}</a>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for k in kegiatan_mendatang %}
+                <div class="list-group-item py-3">
+                    <div class="d-flex justify-content-between">
+                        <div class="fw-semibold small">{{ k.judul }}</div>
+                        <span class="badge bg-success-subtle text-success">{{ k.tanggal|date:"d M" }}</span>
+                    </div>
+                    <div class="text-muted" style="font-size:0.75rem">
+                        <i class="bi bi-geo-alt me-1"></i>{{ k.tempat }}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="list-group-item text-muted text-center py-4">{% trans "Belum ada kegiatan mendatang." %}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <span class="fw-bold">{% trans "Berita Terbaru" %}</span>
+                <a href="{% url 'berita:panel_list' %}" class="btn btn-sm btn-outline-primary">{% trans "Lihat Semua" %}</a>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for b in berita_terbaru %}
+                <div class="list-group-item py-3">
+                    <div class="d-flex justify-content-between">
+                        <div class="fw-semibold small">{{ b.judul|truncatechars:50 }}</div>
+                        <span class="badge {% if b.is_published %}bg-success{% else %}bg-secondary{% endif %}-subtle {% if b.is_published %}text-success{% else %}text-secondary{% endif %}">
+                            {% if b.is_published %}{% trans "Publik" %}{% else %}{% trans "Draft" %}{% endif %}
+                        </span>
+                    </div>
+                    <div class="text-muted" style="font-size:0.75rem">{{ b.created_at|date:"d M Y" }}</div>
+                </div>
+                {% empty %}
+                <div class="list-group-item text-muted text-center py-4">{% trans "Belum ada berita." %}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

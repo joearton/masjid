@@ -1,0 +1,148 @@
+{% extends "base/public.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-header-title">{% trans "Profil Masjid" %}</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">{% trans "Beranda" %}</a></li>
+                <li class="breadcrumb-item active">{% trans "Profil" %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container py-5">
+    {% if profil %}
+    <!-- Profil Utama -->
+    <div class="row g-5 align-items-center mb-5">
+        <div class="col-lg-6">
+            {% if profil.foto %}
+            <img src="{{ profil.foto.url }}" class="img-fluid rounded-3 shadow" alt="{{ profil.nama }}">
+            {% else %}
+            <div class="bg-light rounded-3 d-flex align-items-center justify-content-center" style="height:300px">
+                <i class="bi bi-building display-1 text-muted"></i>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-lg-6">
+            <h2 class="fw-bold mb-2">{{ profil.nama }}</h2>
+            {% if profil.tagline %}<p class="lead text-primary mb-4">{{ profil.tagline }}</p>{% endif %}
+            <div class="mb-3">
+                <h5 class="fw-semibold">{% trans "Sejarah" %}</h5>
+                <p class="text-muted">{{ profil.sejarah|linebreaks }}</p>
+            </div>
+            <div class="d-flex flex-wrap gap-3">
+                {% if profil.telepon %}
+                <div class="d-flex align-items-center gap-2 text-muted">
+                    <i class="bi bi-telephone text-primary"></i> {{ profil.telepon }}
+                </div>
+                {% endif %}
+                {% if profil.email %}
+                <div class="d-flex align-items-center gap-2 text-muted">
+                    <i class="bi bi-envelope text-primary"></i> {{ profil.email }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Visi Misi -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="icon-box bg-primary-subtle text-primary rounded-3 p-3">
+                            <i class="bi bi-eye fs-4"></i>
+                        </div>
+                        <h4 class="fw-bold mb-0">{% trans "Visi" %}</h4>
+                    </div>
+                    <p class="text-muted">{{ profil.visi }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="icon-box bg-success-subtle text-success rounded-3 p-3">
+                            <i class="bi bi-flag fs-4"></i>
+                        </div>
+                        <h4 class="fw-bold mb-0">{% trans "Misi" %}</h4>
+                    </div>
+                    <p class="text-muted">{{ profil.misi|linebreaks }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Pengurus -->
+    {% if pengurus %}
+    <div class="mb-5">
+        <h3 class="section-title mb-4">
+            {% trans "Pengurus Masjid" %}
+            {% if periode %}
+            <small class="text-muted fs-5 ms-2">({{ periode.nama }})</small>
+            {% endif %}
+        </h3>
+        <div class="row g-4">
+            {% for p in pengurus %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="card text-center border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        {% if p.foto %}
+                        <img src="{{ p.foto.url }}" class="rounded-circle mb-3" width="80" height="80" style="object-fit:cover" alt="{{ p.nama }}">
+                        {% else %}
+                        <div class="avatar-lg rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center mx-auto mb-3" style="width:80px;height:80px;font-size:2rem">
+                            {{ p.nama|first|upper }}
+                        </div>
+                        {% endif %}
+                        <h6 class="fw-bold mb-1">{{ p.nama }}</h6>
+                        <span class="badge bg-primary-subtle text-primary">{{ p.get_jabatan_display }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Fasilitas -->
+    {% if fasilitas %}
+    <div class="mb-5">
+        <h3 class="section-title mb-4">{% trans "Fasilitas" %}</h3>
+        <div class="row g-3">
+            {% for f in fasilitas %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body d-flex align-items-center gap-3 p-3">
+                        <div class="icon-box bg-warning-subtle text-warning rounded-3 p-2">
+                            <i class="bi {{ f.icon }} fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="fw-semibold small">{{ f.nama }}</div>
+                            {% if f.deskripsi %}<div class="text-muted" style="font-size:0.75rem">{{ f.deskripsi|truncatechars:50 }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Lokasi -->
+    {% if profil and profil.maps_embed %}
+    <div>
+        <h3 class="section-title mb-4">{% trans "Lokasi" %}</h3>
+        <div class="ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm">
+            {{ profil.maps_embed|safe }}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

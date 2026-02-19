@@ -1,0 +1,74 @@
+{% load i18n %}
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-building fs-4 text-warning"></i>
+            <div>
+                <div class="fw-bold text-white small">{{ SITE_NAME }}</div>
+                <div class="text-muted" style="font-size:0.7rem">{% trans "Panel Admin" %}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-body">
+        <div class="sidebar-label">{% trans "Utama" %}</div>
+        <a href="{% url 'panel:dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <i class="bi bi-speedometer2"></i> {% trans "Dashboard" %}
+        </a>
+
+        <div class="sidebar-label mt-3">{% trans "Konten" %}</div>
+        <a href="{% url 'berita:panel_list' %}" class="sidebar-link {% if 'berita' in request.resolver_match.namespace %}active{% endif %}">
+            <i class="bi bi-newspaper"></i> {% trans "Berita" %}
+        </a>
+        <a href="{% url 'kegiatan:panel_list' %}" class="sidebar-link {% if 'kegiatan' in request.resolver_match.namespace %}active{% endif %}">
+            <i class="bi bi-calendar-event"></i> {% trans "Kegiatan" %}
+        </a>
+
+        <div class="sidebar-label mt-3">{% trans "Masjid" %}</div>
+        <a href="{% url 'profil:panel_profil' %}" class="sidebar-link {% if request.resolver_match.url_name == 'panel_profil' %}active{% endif %}">
+            <i class="bi bi-info-circle"></i> {% trans "Profil Masjid" %}
+        </a>
+        <a href="{% url 'profil:panel_pengurus_list' %}" class="sidebar-link {% if 'pengurus' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="bi bi-people"></i> {% trans "Pengurus" %}
+        </a>
+        <a href="{% url 'profil:panel_periode_list' %}" class="sidebar-link {% if 'periode' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="bi bi-calendar-range"></i> {% trans "Periode Pengurus" %}
+        </a>
+        <a href="{% url 'profil:panel_fasilitas_list' %}" class="sidebar-link {% if 'fasilitas' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="bi bi-building-check"></i> {% trans "Fasilitas" %}
+        </a>
+        <a href="{% url 'sholat:panel_settings' %}" class="sidebar-link {% if 'settings' in request.resolver_match.url_name and 'sholat' in request.resolver_match.namespace %}active{% endif %}">
+            <i class="bi bi-gear"></i> {% trans "Pengaturan Sholat" %}
+        </a>
+        <a href="{% url 'sholat:panel_jumat_list' %}" class="sidebar-link {% if 'jumat' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="bi bi-moon-stars"></i> {% trans "Jadwal Jumat" %}
+        </a>
+
+        <div class="sidebar-label mt-3">{% trans "Keuangan" %}</div>
+        <a href="{% url 'keuangan:panel_list' %}" class="sidebar-link {% if 'keuangan' in request.resolver_match.namespace and 'kategori' not in request.resolver_match.url_name %}active{% endif %}">
+            <i class="bi bi-wallet2"></i> {% trans "Transaksi" %}
+        </a>
+        <a href="{% url 'keuangan:panel_kategori_list' %}" class="sidebar-link {% if 'kategori' in request.resolver_match.url_name and 'keuangan' in request.resolver_match.namespace %}active{% endif %}">
+            <i class="bi bi-tags"></i> {% trans "Kategori" %}
+        </a>
+        <a href="{% url 'donatur:panel_list' %}" class="sidebar-link {% if 'donatur' in request.resolver_match.namespace %}active{% endif %}">
+            <i class="bi bi-person-heart"></i> {% trans "Donatur" %}
+        </a>
+
+        <div class="sidebar-label mt-3">{% trans "Fitur Lain" %}</div>
+        <a href="{% url 'display:panel_settings_list' %}" class="sidebar-link {% if 'display' in request.resolver_match.namespace %}active{% endif %}">
+            <i class="bi bi-tv"></i> {% trans "Layar Masjid" %}
+        </a>
+        <a href="{% url 'panel:site_setting' %}" class="sidebar-link {% if request.resolver_match.url_name == 'site_setting' %}active{% endif %}">
+            <i class="bi bi-palette"></i> {% trans "Pengaturan Website" %}
+        </a>
+
+        <div class="sidebar-label mt-3">{% trans "Akun" %}</div>
+        <a href="{% url 'core:home' %}" class="sidebar-link" target="_blank">
+            <i class="bi bi-globe"></i> {% trans "Lihat Website" %}
+        </a>
+        <a href="{% url 'panel:logout' %}" class="sidebar-link text-danger">
+            <i class="bi bi-box-arrow-right"></i> {% trans "Keluar" %}
+        </a>
+    </div>
+</nav>

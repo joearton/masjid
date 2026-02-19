@@ -1,0 +1,23 @@
+{% extends "base/root.html" %}
+{% load i18n static %}
+
+{% block body %}
+<div class="panel-wrapper">
+    <!-- Sidebar -->
+    {% include "components/sidebar.html" %}
+
+    <!-- Main Panel -->
+    <div class="panel-main">
+        <!-- Panel Topbar -->
+        {% include "components/topbar.html" %}
+
+        <!-- Messages -->
+        {% include "components/messages.html" %}
+
+        <!-- Panel Content -->
+        <div class="panel-content">
+            {% block panel_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}

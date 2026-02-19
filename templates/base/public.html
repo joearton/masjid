@@ -1,0 +1,18 @@
+{% extends "base/root.html" %}
+{% load i18n static %}
+
+{% block body %}
+<!-- Navbar -->
+{% include "components/navbar.html" %}
+
+<!-- Messages -->
+{% include "components/messages.html" %}
+
+<!-- Main Content -->
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<!-- Footer -->
+{% include "components/footer.html" %}
+{% endblock %}

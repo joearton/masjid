@@ -1,0 +1,485 @@
+{% extends "base/panel.html" %}
+{% load i18n %}
+
+{% block extra_css %}
+<style>
+    .setting-tabs .nav-link {
+        color: #6c757d;
+        font-size: 0.85rem;
+        font-weight: 500;
+        padding: 0.6rem 1rem;
+        border: none;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        transition: all 0.2s;
+    }
+    .setting-tabs .nav-link:hover {
+        color: var(--primary, #1a6b3c);
+        border-bottom-color: rgba(26, 107, 60, 0.3);
+    }
+    .setting-tabs .nav-link.active {
+        color: var(--primary, #1a6b3c);
+        font-weight: 600;
+        border-bottom-color: var(--primary, #1a6b3c);
+        background: transparent;
+    }
+    .setting-tabs .nav-link i { margin-right: 6px; }
+    .setting-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .setting-section-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .color-preview {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .form-control-color {
+        width: 60px !important;
+        height: 40px !important;
+        padding: 4px !important;
+        cursor: pointer;
+    }
+    .form-text { font-size: 0.75rem; }
+    .toggle-switch {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0.75rem 0;
+    }
+    .toggle-switch label {
+        margin-bottom: 0;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block panel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">
+            <i class="bi bi-palette me-2 text-primary"></i>{% trans "Pengaturan Website" %}
+        </h4>
+        <p class="text-muted small mb-0">{% trans "Atur tampilan, tema, dan fitur website masjid Anda" %}</p>
+    </div>
+    <div>
+        <a href="{% url 'core:home' %}" target="_blank" class="btn btn-outline-secondary btn-sm me-2">
+            <i class="bi bi-eye me-1"></i>{% trans "Preview" %}
+        </a>
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Tabs Navigation -->
+    <ul class="nav setting-tabs mb-4 border-bottom" id="settingTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-tema" data-bs-toggle="tab" data-bs-target="#pane-tema" type="button" role="tab">
+                <i class="bi bi-brush"></i>{% trans "Tema & Warna" %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-hero" data-bs-toggle="tab" data-bs-target="#pane-hero" type="button" role="tab">
+                <i class="bi bi-image"></i>{% trans "Hero Section" %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-layout" data-bs-toggle="tab" data-bs-target="#pane-layout" type="button" role="tab">
+                <i class="bi bi-layout-text-window-reverse"></i>{% trans "Layout & Navbar" %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-sosmed" data-bs-toggle="tab" data-bs-target="#pane-sosmed" type="button" role="tab">
+                <i class="bi bi-share"></i>{% trans "Sosial Media" %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-fitur" data-bs-toggle="tab" data-bs-target="#pane-fitur" type="button" role="tab">
+                <i class="bi bi-toggles"></i>{% trans "Fitur" %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-donasi" data-bs-toggle="tab" data-bs-target="#pane-donasi" type="button" role="tab">
+                <i class="bi bi-heart"></i>{% trans "Donasi" %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-seo" data-bs-toggle="tab" data-bs-target="#pane-seo" type="button" role="tab">
+                <i class="bi bi-search"></i>{% trans "SEO & Meta" %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-advanced" data-bs-toggle="tab" data-bs-target="#pane-advanced" type="button" role="tab">
+                <i class="bi bi-code-slash"></i>{% trans "Lanjutan" %}
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="settingTabContent">
+
+        <!-- ═══════ TEMA & WARNA ═══════ -->
+        <div class="tab-pane fade show active" id="pane-tema" role="tabpanel">
+            <div class="setting-section shadow-sm">
+                <div class="setting-section-title">{% trans "Pilihan Tema" %}</div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ form.tema.label }}</label>
+                    {{ form.tema }}
+                    {% if form.tema.help_text %}<div class="form-text">{{ form.tema.help_text }}</div>{% endif %}
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">{{ form.warna_primary.label }}</label>
+                        <div class="d-flex align-items-center gap-3">
+                            {{ form.warna_primary }}
+                            <code id="primaryHex">{{ form.warna_primary.value }}</code>
+                        </div>
+                        {% if form.warna_primary.help_text %}<div class="form-text">{{ form.warna_primary.help_text }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">{{ form.warna_accent.label }}</label>
+                        <div class="d-flex align-items-center gap-3">
+                            {{ form.warna_accent }}
+                            <code id="accentHex">{{ form.warna_accent.value }}</code>
+                        </div>
+                        {% if form.warna_accent.help_text %}<div class="form-text">{{ form.warna_accent.help_text }}</div>{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ HERO SECTION ═══════ -->
+        <div class="tab-pane fade" id="pane-hero" role="tabpanel">
+            <div class="setting-section shadow-sm">
+                <div class="setting-section-title">{% trans "Tampilan Hero Banner" %}</div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">{{ form.hero_style.label }}</label>
+                        {{ form.hero_style }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">{{ form.hero_overlay_color.label }}</label>
+                        <div class="d-flex align-items-center gap-2">
+                            {{ form.hero_overlay_color }}
+                            <code>{{ form.hero_overlay_color.value }}</code>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">{{ form.hero_overlay_opacity.label }}</label>
+                        {{ form.hero_overlay_opacity }}
+                        {% if form.hero_overlay_opacity.help_text %}<div class="form-text">{{ form.hero_overlay_opacity.help_text }}</div>{% endif %}
+                    </div>
+                </div>
+                <hr>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">{{ form.hero_judul.label }}</label>
+                        {{ form.hero_judul }}
+                        {% if form.hero_judul.help_text %}<div class="form-text">{{ form.hero_judul.help_text }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">{{ form.hero_subjudul.label }}</label>
+                        {{ form.hero_subjudul }}
+                        {% if form.hero_subjudul.help_text %}<div class="form-text">{{ form.hero_subjudul.help_text }}</div>{% endif %}
+                    </div>
+                </div>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">{{ form.hero_gambar.label }}</label>
+                        {% if object.hero_gambar %}
+                        <div class="mb-2">
+                            <img src="{{ object.hero_gambar.url }}" alt="Hero" style="max-height:100px;border-radius:8px;" class="shadow-sm">
+                        </div>
+                        {% endif %}
+                        <input type="file" name="hero_gambar" class="form-control" accept="image/*">
+                        {% if form.hero_gambar.help_text %}<div class="form-text">{{ form.hero_gambar.help_text }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">{{ form.hero_video_url.label }}</label>
+                        {{ form.hero_video_url }}
+                        {% if form.hero_video_url.help_text %}<div class="form-text">{{ form.hero_video_url.help_text }}</div>{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ LAYOUT & NAVBAR ═══════ -->
+        <div class="tab-pane fade" id="pane-layout" role="tabpanel">
+            <div class="setting-section shadow-sm">
+                <div class="setting-section-title">{% trans "Layout Homepage" %}</div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ form.homepage_layout.label }}</label>
+                    {{ form.homepage_layout }}
+                    {% if form.homepage_layout.help_text %}<div class="form-text">{{ form.homepage_layout.help_text }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="setting-section shadow-sm">
+                <div class="setting-section-title">{% trans "Navbar & Branding" %}</div>
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="id_tampilkan_logo" name="tampilkan_logo" {% if form.tampilkan_logo.value %}checked{% endif %}>
+                        <label class="form-check-label fw-semibold" for="id_tampilkan_logo">{{ form.tampilkan_logo.label }}</label>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">{{ form.logo.label }}</label>
+                        {% if object.logo %}
+                        <div class="mb-2">
+                            <img src="{{ object.logo.url }}" alt="Logo" style="max-height:50px;">
+                        </div>
+                        {% endif %}
+                        <input type="file" name="logo" class="form-control" accept="image/*">
+                        {% if form.logo.help_text %}<div class="form-text">{{ form.logo.help_text }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">{{ form.favicon.label }}</label>
+                        {% if object.favicon %}
+                        <div class="mb-2">
+                            <img src="{{ object.favicon.url }}" alt="Favicon" style="max-height:32px;">
+                        </div>
+                        {% endif %}
+                        <input type="file" name="favicon" class="form-control" accept="image/*">
+                        {% if form.favicon.help_text %}<div class="form-text">{{ form.favicon.help_text }}</div>{% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="setting-section shadow-sm">
+                <div class="setting-section-title">{% trans "Footer" %}</div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ form.footer_text.label }}</label>
+                    {{ form.footer_text }}
+                    {% if form.footer_text.help_text %}<div class="form-text">{{ form.footer_text.help_text }}</div>{% endif %}
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="id_footer_show_social" name="footer_show_social" {% if form.footer_show_social.value %}checked{% endif %}>
+                    <label class="form-check-label fw-semibold" for="id_footer_show_social">{{ form.footer_show_social.label }}</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ SOSIAL MEDIA ═══════ -->
+        <div class="tab-pane fade" id="pane-sosmed" role="tabpanel">
+            <div class="setting-section shadow-sm">
+                <div class="setting-section-title">{% trans "Link Sosial Media" %}</div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold"><i class="bi bi-facebook text-primary me-1"></i>{{ form.facebook_url.label }}</label>
+                    {{ form.facebook_url }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold"><i class="bi bi-instagram text-danger me-1"></i>{{ form.instagram_url.label }}</label>
+                    {{ form.instagram_url }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold"><i class="bi bi-youtube text-danger me-1"></i>{{ form.youtube_url.label }}</label>
+                    {{ form.youtube_url }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold"><i class="bi bi-tiktok me-1"></i>{{ form.tiktok_url.label }}</label>
+                    {{ form.tiktok_url }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold"><i class="bi bi-twitter-x me-1"></i>{{ form.twitter_url.label }}</label>
+                    {{ form.twitter_url }}
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ FITUR ═══════ -->
+        <div class="tab-pane fade" id="pane-fitur" role="tabpanel">
+            <div class="setting-section shadow-sm">
+                <div class="setting-section-title">{% trans "Tampilkan/Sembunyikan Fitur di Beranda" %}</div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="id_tampilkan_jadwal_sholat" name="tampilkan_jadwal_sholat" {% if form.tampilkan_jadwal_sholat.value %}checked{% endif %}>
+                    <label class="form-check-label fw-semibold" for="id_tampilkan_jadwal_sholat">{{ form.tampilkan_jadwal_sholat.label }}</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="id_tampilkan_kegiatan" name="tampilkan_kegiatan" {% if form.tampilkan_kegiatan.value %}checked{% endif %}>
+                    <label class="form-check-label fw-semibold" for="id_tampilkan_kegiatan">{{ form.tampilkan_kegiatan.label }}</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="id_tampilkan_berita" name="tampilkan_berita" {% if form.tampilkan_berita.value %}checked{% endif %}>
+                    <label class="form-check-label fw-semibold" for="id_tampilkan_berita">{{ form.tampilkan_berita.label }}</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="id_tampilkan_keuangan" name="tampilkan_keuangan" {% if form.tampilkan_keuangan.value %}checked{% endif %}>
+                    <label class="form-check-label fw-semibold" for="id_tampilkan_keuangan">{{ form.tampilkan_keuangan.label }}</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="id_tampilkan_donasi" name="tampilkan_donasi" {% if form.tampilkan_donasi.value %}checked{% endif %}>
+                    <label class="form-check-label fw-semibold" for="id_tampilkan_donasi">{{ form.tampilkan_donasi.label }}</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ DONASI ═══════ -->
+        <div class="tab-pane fade" id="pane-donasi" role="tabpanel">
+            <div class="setting-section shadow-sm">
+                <div class="setting-section-title">{% trans "Pengaturan Donasi" %}</div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ form.donasi_teks.label }}</label>
+                    {{ form.donasi_teks }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ form.rekening_info.label }}</label>
+                    {{ form.rekening_info }}
+                    {% if form.rekening_info.help_text %}<div class="form-text">{{ form.rekening_info.help_text }}</div>{% endif %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ form.qris_image.label }}</label>
+                    {% if object.qris_image %}
+                    <div class="mb-2">
+                        <img src="{{ object.qris_image.url }}" alt="QRIS" style="max-height:120px;border-radius:8px;" class="shadow-sm">
+                    </div>
+                    {% endif %}
+                    <input type="file" name="qris_image" class="form-control" accept="image/*">
+                    {% if form.qris_image.help_text %}<div class="form-text">{{ form.qris_image.help_text }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ SEO & META ═══════ -->
+        <div class="tab-pane fade" id="pane-seo" role="tabpanel">
+            <div class="setting-section shadow-sm">
+                <div class="setting-section-title">{% trans "Optimasi Mesin Pencari" %}</div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ form.meta_description.label }}</label>
+                    {{ form.meta_description }}
+                    {% if form.meta_description.help_text %}<div class="form-text">{{ form.meta_description.help_text }}</div>{% endif %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ form.meta_keywords.label }}</label>
+                    {{ form.meta_keywords }}
+                    {% if form.meta_keywords.help_text %}<div class="form-text">{{ form.meta_keywords.help_text }}</div>{% endif %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ form.google_analytics_id.label }}</label>
+                    {{ form.google_analytics_id }}
+                    {% if form.google_analytics_id.help_text %}<div class="form-text">{{ form.google_analytics_id.help_text }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ LANJUTAN ═══════ -->
+        <div class="tab-pane fade" id="pane-advanced" role="tabpanel">
+            <div class="setting-section shadow-sm">
+                <div class="setting-section-title">
+                    <i class="bi bi-exclamation-triangle text-warning me-1"></i>{% trans "Mode Maintenance" %}
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="id_maintenance_mode" name="maintenance_mode" {% if form.maintenance_mode.value %}checked{% endif %}>
+                    <label class="form-check-label fw-semibold" for="id_maintenance_mode">{{ form.maintenance_mode.label }}</label>
+                    {% if form.maintenance_mode.help_text %}<div class="form-text">{{ form.maintenance_mode.help_text }}</div>{% endif %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ form.maintenance_message.label }}</label>
+                    {{ form.maintenance_message }}
+                </div>
+            </div>
+            <div class="setting-section shadow-sm">
+                <div class="setting-section-title">{% trans "Custom Code" %}</div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ form.custom_css.label }}</label>
+                    {{ form.custom_css }}
+                    {% if form.custom_css.help_text %}<div class="form-text">{{ form.custom_css.help_text }}</div>{% endif %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ form.custom_js.label }}</label>
+                    {{ form.custom_js }}
+                    {% if form.custom_js.help_text %}<div class="form-text">{{ form.custom_js.help_text }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Submit Button -->
+    <div class="d-flex justify-content-end mt-4 gap-2">
+        <a href="{% url 'panel:dashboard' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>{% trans "Kembali" %}
+        </a>
+        <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-check-lg me-1"></i>{% trans "Simpan Pengaturan" %}
+        </button>
+    </div>
+</form>
+
+{% if object.updated_at %}
+<div class="text-muted text-end small mt-3">
+    <i class="bi bi-clock-history me-1"></i>{% trans "Terakhir disimpan:" %} {{ object.updated_at|date:"d M Y, H:i" }}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Theme Presets
+    const THEMES = {
+        'default': { primary: '#1a6b3c', accent: '#f0a500' },
+        'blue': { primary: '#0d6efd', accent: '#ffc107' },
+        'dark': { primary: '#212529', accent: '#0d6efd' },
+        'maroon': { primary: '#800000', accent: '#d4af37' },
+        'teal': { primary: '#008080', accent: '#ffa500' },
+        'purple': { primary: '#6f42c1', accent: '#00d2d3' }
+    };
+
+    const themeSelect = document.getElementById('id_tema');
+    const primaryInput = document.getElementById('id_warna_primary');
+    const accentInput = document.getElementById('id_warna_accent');
+
+    if (themeSelect) {
+        themeSelect.addEventListener('change', function() {
+            const theme = this.value;
+            if (THEMES[theme]) {
+                primaryInput.value = THEMES[theme].primary;
+                accentInput.value = THEMES[theme].accent;
+                
+                // Trigger input event to update hex labels
+                primaryInput.dispatchEvent(new Event('input'));
+                accentInput.dispatchEvent(new Event('input'));
+            }
+        });
+    }
+
+    // Live update hex code labels for color pickers
+    document.querySelectorAll('input[type="color"]').forEach(function(input) {
+        input.addEventListener('input', function() {
+            var codeEl = this.closest('.d-flex')?.querySelector('code');
+            if (codeEl) codeEl.textContent = this.value;
+        });
+    });
+
+    // Persist active tab in URL hash
+    var triggerTabList = document.querySelectorAll('#settingTabs button');
+    triggerTabList.forEach(function(btn) {
+        btn.addEventListener('shown.bs.tab', function(e) {
+            history.replaceState(null, null, '#' + e.target.getAttribute('data-bs-target').replace('#pane-', ''));
+        });
+    });
+
+    // Restore tab from URL hash on load
+    var hash = window.location.hash.replace('#', '');
+    if (hash) {
+        var tab = document.querySelector('#settingTabs button[data-bs-target="#pane-' + hash + '"]');
+        if (tab) {
+            var bsTab = new bootstrap.Tab(tab);
+            bsTab.show();
+        }
+    }
+</script>
+{% endblock %}

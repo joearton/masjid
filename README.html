@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Instalasi Masjid Al-Ikhlas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 900px; margin-top: 3rem; margin-bottom: 3rem; }
+        .card { border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden; }
+        .card-header { background-color: #1a6b3c; color: white; padding: 1.5rem; }
+        .command-box { background-color: #2d2d2d; color: #f8f8f2; padding: 1rem; border-radius: 6px; font-family: 'Consolas', 'Monaco', monospace; margin: 1rem 0; overflow-x: auto; }
+        .step-number { background-color: #1a6b3c; color: white; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; margin-right: 10px; font-weight: bold; }
+        h4 { margin-top: 2rem; margin-bottom: 1rem; display: flex; align-items: center; }
+        .alert-info { border-left: 5px solid #0dcaf0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header text-center">
+                <h1 class="h3 mb-0">Panduan Instalasi Sistem Informasi Masjid</h1>
+                <p class="mb-0 opacity-75">Masjid Al-Ikhlas (Django Project)</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                
+                <div class="alert alert-info">
+                    <strong>Prasyarat:</strong> Pastikan Python 3.8+ dan pip sudah terinstal di komputer Anda.
+                </div>
+
+                <h4><span class="step-number">1</span>Persiapan Lingkungan (Virtual Environment)</h4>
+                <p>Disarankan menggunakan virtual environment agar dependensi proyek tidak tercampur dengan sistem global.</p>
+                <div class="command-box">
+                    # Windows<br>
+                    python -m venv venv<br>
+                    venv\Scripts\activate<br><br>
+                    # macOS / Linux<br>
+                    python3 -m venv venv<br>
+                    source venv/bin/activate
+                </div>
+
+                <h4><span class="step-number">2</span>Instalasi Dependensi</h4>
+                <p>Instal paket-paket Python yang dibutuhkan oleh aplikasi ini.</p>
+                <div class="command-box">
+                    pip install django django-crispy-forms crispy-bootstrap5 pillow adhanpy pytz currency-symbols
+                </div>
+                <small class="text-muted">*Jika ada file requirements.txt, gunakan: <code>pip install -r requirements.txt</code></small>
+
+                <h4><span class="step-number">3</span>Setup Database & Migrasi</h4>
+                <p>Inisialisasi database SQLite (default) dan jalankan migrasi tabel.</p>
+                <div class="command-box">
+                    python manage.py makemigrations<br>
+                    python manage.py migrate
+                </div>
+
+                <h4><span class="step-number">4</span>Import Dummy Data (Data Contoh)</h4>
+                <p>Aplikasi ini menyediakan perintah khusus untuk mengisi database dengan data contoh (Jadwal Sholat, Berita, Kegiatan, Keuangan, Donatur, dan Akun Admin).</p>
+                <div class="command-box">
+                    python manage.py populate_dummy_data
+                </div>
+                
+                <div class="alert alert-success mt-3">
+                    <h5 class="alert-heading h6 fw-bold">Akun yang Dibuat Otomatis:</h5>
+                    <ul class="mb-0">
+                        <li><strong>Superuser:</strong> Username: <code>admin</code> / Password: <code>admin</code></li>
+                        <li><strong>Staf:</strong> Username: <code>staff</code> / Password: <code>staff</code></li>
+                    </ul>
+                </div>
+
+                <h4><span class="step-number">5</span>Menjalankan Server</h4>
+                <p>Jalankan server pengembangan lokal.</p>
+                <div class="command-box">
+                    python manage.py runserver
+                </div>
+
+                <h4><span class="step-number">6</span>Akses Aplikasi</h4>
+                <ul class="list-group list-group-flush mt-2">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Halaman Publik
+                        <a href="http://localhost:8000" target="_blank" class="btn btn-sm btn-outline-primary">http://localhost:8000</a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Panel Admin (Dashboard Pengurus)
+                        <a href="http://localhost:8000/panel/" target="_blank" class="btn btn-sm btn-outline-primary">http://localhost:8000/panel/</a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Display Digital Signage (TV Masjid)
+                        <a href="http://localhost:8000/display/" target="_blank" class="btn btn-sm btn-outline-primary">http://localhost:8000/display/</a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Django Admin (Superuser)
+                        <a href="http://localhost:8000/admin/" target="_blank" class="btn btn-sm btn-outline-primary">http://localhost:8000/admin/</a>
+                    </li>
+                </ul>
+
+                <hr class="my-5">
+
+                <h5 class="fw-bold">Fitur Utama:</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <ul class="text-secondary">
+                            <li>Jadwal Sholat Otomatis (Lokasi & Koordinat)</li>
+                            <li>Koreksi Waktu Sholat</li>
+                            <li>Manajemen Keuangan (Pemasukan/Pengeluaran)</li>
+                            <li>Laporan Kas Bulanan/Tahunan</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="text-secondary">
+                            <li>Manajemen Donatur Tetap</li>
+                            <li>Manajemen Kegiatan & Berita</li>
+                            <li>Digital Signage View (Mode Layar Penuh)</li>
+                            <li>Panel Admin Responsif</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <div class="card-footer text-center text-muted py-3 small">
+                &copy; {% now "Y" %} Sistem Informasi Masjid Al-Ikhlas
+            </div>
+        </div>
+    </div>
+</body>
+</html>

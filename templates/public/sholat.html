@@ -1,0 +1,148 @@
+{% extends "base/public.html" %}
+{% load i18n hijri_tags %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-header-title">{% trans "Jadwal Sholat" %}</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">{% trans "Beranda" %}</a></li>
+                <li class="breadcrumb-item active">{% trans "Jadwal Sholat" %}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container py-5">
+    <!-- Jadwal Hari Ini -->
+    {% if jadwal_hari_ini %}
+    <div class="card border-0 shadow mb-5 overflow-hidden">
+        <div class="card-header bg-primary text-white py-3">
+            <h4 class="mb-0 fw-bold">
+                <i class="bi bi-clock-fill me-2 text-warning"></i>
+                {% trans "Jadwal Sholat Hari Ini" %} — {{ jadwal_hari_ini.tanggal|date:"l, d F Y" }}
+            </h4>
+            <div class="mt-1 small" style="opacity:0.85;">
+                <i class="bi bi-moon-stars me-1"></i>{{ jadwal_hari_ini.tanggal|hijri_full }}
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="row g-0 text-center">
+                <div class="col border-end py-4">
+                    <i class="bi bi-sunrise text-warning fs-3 mb-2 d-block"></i>
+                    <div class="text-muted small">{% trans "Subuh" %}</div>
+                    <div class="fs-4 fw-bold text-primary">{{ jadwal_hari_ini.subuh|time:"H:i" }}</div>
+                </div>
+                <div class="col border-end py-4">
+                    <i class="bi bi-sun text-warning fs-3 mb-2 d-block"></i>
+                    <div class="text-muted small">{% trans "Terbit" %}</div>
+                    <div class="fs-4 fw-bold text-primary">{{ jadwal_hari_ini.terbit|time:"H:i" }}</div>
+                </div>
+                <div class="col border-end py-4">
+                    <i class="bi bi-sun-fill text-warning fs-3 mb-2 d-block"></i>
+                    <div class="text-muted small">{% trans "Dzuhur" %}</div>
+                    <div class="fs-4 fw-bold text-primary">{{ jadwal_hari_ini.dzuhur|time:"H:i" }}</div>
+                </div>
+                <div class="col border-end py-4">
+                    <i class="bi bi-cloud-sun text-warning fs-3 mb-2 d-block"></i>
+                    <div class="text-muted small">{% trans "Ashar" %}</div>
+                    <div class="fs-4 fw-bold text-primary">{{ jadwal_hari_ini.ashar|time:"H:i" }}</div>
+                </div>
+                <div class="col border-end py-4">
+                    <i class="bi bi-sunset text-warning fs-3 mb-2 d-block"></i>
+                    <div class="text-muted small">{% trans "Maghrib" %}</div>
+                    <div class="fs-4 fw-bold text-primary">{{ jadwal_hari_ini.maghrib|time:"H:i" }}</div>
+                </div>
+                <div class="col py-4">
+                    <i class="bi bi-moon-stars text-warning fs-3 mb-2 d-block"></i>
+                    <div class="text-muted small">{% trans "Isya" %}</div>
+                    <div class="fs-4 fw-bold text-primary">{{ jadwal_hari_ini.isya|time:"H:i" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info mb-5">
+        <i class="bi bi-info-circle me-2"></i>
+        {% trans "Jadwal sholat hari ini belum tersedia. Pastikan pengaturan lokasi masjid sudah diatur." %}
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Jadwal Bulanan -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">{% trans "Jadwal Sholat Bulan Ini" %}</h5>
+                    <a href="{% url 'sholat:print' %}" target="_blank" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-printer me-1"></i>{% trans "Cetak Jadwal" %}
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>{% trans "Tanggal" %}</th>
+                                <th>{% trans "Subuh" %}</th>
+                                <th>{% trans "Dzuhur" %}</th>
+                                <th>{% trans "Ashar" %}</th>
+                                <th>{% trans "Maghrib" %}</th>
+                                <th>{% trans "Isya" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for j in jadwal_bulan_ini %}
+                            <tr {% if j.tanggal == jadwal_hari_ini.tanggal %}class="table-primary fw-bold"{% endif %}>
+                                <td>
+                                    {{ j.tanggal|date:"d M" }}
+                                    <div class="text-muted" style="font-size:0.7rem;">{{ j.tanggal|hijri_short }}</div>
+                                </td>
+                                <td>{{ j.subuh|time:"H:i" }}</td>
+                                <td>{{ j.dzuhur|time:"H:i" }}</td>
+                                <td>{{ j.ashar|time:"H:i" }}</td>
+                                <td>{{ j.maghrib|time:"H:i" }}</td>
+                                <td>{{ j.isya|time:"H:i" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center text-muted py-4">{% trans "Jadwal belum tersedia." %}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jadwal Jumat -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="mb-0 fw-bold">{% trans "Jadwal Jumat" %}</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for j in jadwal_jumat %}
+                    <div class="list-group-item px-4 py-3">
+                        <div class="fw-semibold">{{ j.tanggal|date:"d M Y" }} <span class="text-muted fw-normal small">· {{ j.tanggal|hijri_short }}</span></div>
+                        <div class="small text-muted">
+                            <i class="bi bi-person me-1"></i>{% trans "Khatib" %}: {{ j.khatib }}
+                        </div>
+                        <div class="small text-muted">
+                            <i class="bi bi-person-check me-1"></i>{% trans "Imam" %}: {{ j.imam }}
+                        </div>
+                        {% if j.tema %}
+                        <div class="small text-primary mt-1">
+                            <i class="bi bi-chat-quote me-1"></i>{{ j.tema }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="list-group-item text-center text-muted py-4">
+                        {% trans "Belum ada jadwal Jumat." %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

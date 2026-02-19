@@ -1,0 +1,240 @@
+{% extends "base/public.html" %}
+{% load i18n static hijri_tags crispy_forms_tags %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section" style="{% if site_setting and site_setting.hero_gambar %}background-image: url('{{ site_setting.hero_gambar.url }}'); background-size: cover; background-position: center;{% elif profil_masjid.foto %}background-image: url('{{ profil_masjid.foto.url }}'); background-size: cover; background-position: center;{% endif %}">
+    <div class="hero-overlay" style="position: absolute; inset: 0; background: {% if site_setting %}{{ site_setting.hero_gradient_css }}{% else %}linear-gradient(135deg, rgba(26, 107, 60, 0.9) 0%, rgba(20, 85, 48, 0.8) 50%, rgba(26, 26, 46, 0.9) 100%){% endif %};"></div>
+    <div class="container hero-content text-center text-white" style="position: relative; z-index: 2;">
+        <div class="hero-icon mb-4">
+            {% if site_setting and site_setting.logo %}
+                <img src="{{ site_setting.logo.url }}" alt="{{ SITE_NAME }}" style="height:80px;width:auto;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.3));">
+            {% else %}
+                <i class="bi bi-building display-1 text-warning"></i>
+            {% endif %}
+        </div>
+        <h1 class="display-4 fw-bold mb-3">{% if site_setting and site_setting.hero_judul %}{{ site_setting.hero_judul }}{% else %}{{ SITE_NAME }}{% endif %}</h1>
+        <p class="lead mb-4 opacity-90">{% if site_setting and site_setting.hero_subjudul %}{{ site_setting.hero_subjudul }}{% else %}{{ SITE_TAGLINE }}{% endif %}</p>
+            {% if site_setting and site_setting.tampilkan_donasi %}
+            <a href="{% url 'donatur:public_register' %}" class="btn btn-warning btn-lg px-5 py-3 rounded-pill fw-bold shadow-lg position-relative overflow-hidden group-hover" style="background: linear-gradient(45deg, #f0a500, #ffc107); border: none;">
+                <span class="position-relative z-1"><i class="bi bi-heart-fill me-2 animate-pulse"></i>{% trans "Salurkan Infaq" %}</span>
+                <div class="position-absolute top-0 start-0 w-100 h-100 bg-white opacity-25" style="transform: skewX(-20deg) translateX(-150%); transition: transform 0.5s;"></div>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Floating Donation Button -->
+{% if site_setting and site_setting.tampilkan_donasi %}
+<style>
+    .floating-donate-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1a6b3c, #145530);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 2px solid rgba(255,255,255,0.2);
+        cursor: pointer;
+    }
+    .floating-donate-btn:hover {
+        transform: scale(1.1) rotate(-5deg);
+        box-shadow: 0 8px 25px rgba(26, 107, 60, 0.5);
+    }
+    .floating-donate-btn i {
+        font-size: 1.5rem;
+    }
+    .animate-pulse {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    .group-hover:hover div {
+        transform: skewX(-20deg) translateX(150%) !important;
+    }
+</style>
+<a href="{% url 'donatur:public_register' %}" class="floating-donate-btn" title="{% trans 'Donasi Sekarang' %}" data-bs-toggle="tooltip" data-bs-placement="left">
+    <i class="bi bi-heart-fill"></i>
+</a>
+{% endif %}
+
+<!-- Jadwal Sholat Hari Ini -->
+{% if jadwal_hari_ini %}
+{% if not site_setting or site_setting.tampilkan_jadwal_sholat %}
+<section class="py-4 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center g-3">
+            <div class="col-auto">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-clock-fill fs-4 text-warning"></i>
+                    <div>
+                        <div class="fw-bold">{% trans "Jadwal Sholat Hari Ini" %}</div>
+                        <small class="opacity-75">{{ jadwal_hari_ini.tanggal }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="row g-2 text-center row-cols-2 row-cols-md-5">
+                    <div class="col"><div class="sholat-time-card p-2 rounded bg-white text-primary shadow-sm"><small class="d-block text-muted">{% trans "Subuh" %}</small><div class="fw-bold fs-5">{{ jadwal_hari_ini.subuh|time:"H:i" }}</div></div></div>
+                    <div class="col"><div class="sholat-time-card p-2 rounded bg-white text-primary shadow-sm"><small class="d-block text-muted">{% trans "Dzuhur" %}</small><div class="fw-bold fs-5">{{ jadwal_hari_ini.dzuhur|time:"H:i" }}</div></div></div>
+                    <div class="col"><div class="sholat-time-card p-2 rounded bg-white text-primary shadow-sm"><small class="d-block text-muted">{% trans "Ashar" %}</small><div class="fw-bold fs-5">{{ jadwal_hari_ini.ashar|time:"H:i" }}</div></div></div>
+                    <div class="col"><div class="sholat-time-card p-2 rounded bg-white text-primary shadow-sm"><small class="d-block text-muted">{% trans "Maghrib" %}</small><div class="fw-bold fs-5">{{ jadwal_hari_ini.maghrib|time:"H:i" }}</div></div></div>
+                    <div class="col"><div class="sholat-time-card p-2 rounded bg-white text-primary shadow-sm"><small class="d-block text-muted">{% trans "Isya" %}</small><div class="fw-bold fs-5">{{ jadwal_hari_ini.isya|time:"H:i" }}</div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endif %}
+
+<!-- Kegiatan Mendatang -->
+{% if not site_setting or site_setting.tampilkan_kegiatan %}
+<section class="py-5">
+    <div class="container">
+        <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="section-title">{% trans "Kegiatan Mendatang" %}</h2>
+                <p class="text-muted mb-0">{% trans "Agenda dan kegiatan masjid yang akan datang" %}</p>
+            </div>
+            <a href="{% url 'kegiatan:list' %}" class="btn btn-outline-primary">
+                {% trans "Lihat Semua" %} <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        {% if kegiatan_mendatang %}
+        <div class="row g-4">
+            {% for kegiatan in kegiatan_mendatang %}
+            <div class="col-md-6 col-lg-3">
+                <a href="{% url 'kegiatan:detail' kegiatan.pk %}" class="card-link">
+                    <div class="card kegiatan-card h-100">
+                        {% if kegiatan.gambar %}
+                        <img src="{{ kegiatan.gambar.url }}" class="card-img-top" alt="{{ kegiatan.judul }}" style="height:160px;object-fit:cover">
+                        {% else %}
+                        <div class="card-img-placeholder"><i class="bi bi-calendar-event display-4 text-muted"></i></div>
+                        {% endif %}
+                        <div class="card-body">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-primary-subtle text-primary">
+                                    <i class="bi bi-calendar3 me-1"></i>{{ kegiatan.tanggal|date:"d M Y" }} · {{ kegiatan.tanggal|hijri_short }}
+                                </span>
+                            </div>
+                            <h6 class="card-title fw-bold">{{ kegiatan.judul }}</h6>
+                            <p class="card-text text-muted small">
+                                <i class="bi bi-geo-alt me-1"></i>{{ kegiatan.tempat }}
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state text-center py-5">
+            <i class="bi bi-calendar-x display-4 text-muted"></i>
+            <p class="text-muted mt-3">{% trans "Belum ada kegiatan mendatang." %}</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
+<!-- Berita Terbaru -->
+{% if not site_setting or site_setting.tampilkan_berita %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="section-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="section-title">{% trans "Berita Terbaru" %}</h2>
+                <p class="text-muted mb-0">{% trans "Informasi dan berita terkini dari masjid" %}</p>
+            </div>
+            <a href="{% url 'berita:list' %}" class="btn btn-outline-primary">
+                {% trans "Lihat Semua" %} <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        {% if berita_terbaru %}
+        <div class="row g-4">
+            {% for berita in berita_terbaru %}
+            <div class="col-md-4">
+                <a href="{% url 'berita:detail' berita.slug %}" class="card-link">
+                    <div class="card berita-card h-100">
+                        {% if berita.gambar %}
+                        <img src="{{ berita.gambar.url }}" class="card-img-top" alt="{{ berita.judul }}" style="height:200px;object-fit:cover">
+                        {% else %}
+                        <div class="card-img-placeholder"><i class="bi bi-newspaper display-4 text-muted"></i></div>
+                        {% endif %}
+                        <div class="card-body">
+                            {% if berita.kategori %}
+                            <span class="badge bg-warning text-dark mb-2">{{ berita.kategori.nama }}</span>
+                            {% endif %}
+                            {% if berita.is_pengumuman %}
+                            <span class="badge bg-danger mb-2">{% trans "Pengumuman" %}</span>
+                            {% endif %}
+                            <h6 class="card-title fw-bold">{{ berita.judul }}</h6>
+                            <p class="card-text text-muted small">
+                                <i class="bi bi-clock me-1"></i>{{ berita.created_at|date:"d M Y" }}
+                                <span class="ms-1 text-secondary">· {{ berita.created_at|hijri_short }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state text-center py-5">
+            <i class="bi bi-newspaper display-4 text-muted"></i>
+            <p class="text-muted mt-3">{% trans "Belum ada berita." %}</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
+{% if site_setting and site_setting.tampilkan_donasi %}
+<!-- Modal Donasi -->
+<div class="modal fade" id="donasiModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-heart-fill me-2"></i>{% trans "Salurkan Donasi" %}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <p class="lead mb-4">{{ site_setting.donasi_teks|default:"Mari makmurkan masjid dengan sedekah terbaik Anda." }}</p>
+                
+                {% if site_setting.qris_image %}
+                <div class="mb-4">
+                    <img src="{{ site_setting.qris_image.url }}" alt="QRIS Donasi" class="img-fluid rounded border shadow-sm" style="max-height: 300px;">
+                    <p class="text-muted small mt-2">{% trans "Scan QRIS untuk donasi via e-wallet/mobile banking" %}</p>
+                </div>
+                {% endif %}
+
+                {% if site_setting.rekening_info %}
+                <div class="card bg-light border-0">
+                    <div class="card-body">
+                        {{ site_setting.rekening_info|linebreaks }}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if not site_setting.qris_image and not site_setting.rekening_info %}
+                <p class="text-muted">{% trans "Informasi rekening belum tersedia. Silakan hubungi pengurus." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
