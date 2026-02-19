@@ -1,6 +1,6 @@
-# Panduan Instalasi Sistem Informasi Masjid Al-Ikhlas
+# Panduan Instalasi Sistem Informasi Masjid
 
-Selamat datang di proyek Sistem Informasi Masjid Al-Ikhlas. Berikut adalah panduan langkah demi langkah untuk menginstal dan menjalankan aplikasi ini di komputer lokal Anda.
+Selamat datang di proyek Sistem Informasi Masjid. Berikut adalah panduan langkah demi langkah untuk menginstal dan menjalankan aplikasi ini di komputer lokal Anda.
 
 ## Prasyarat
 
@@ -80,16 +80,9 @@ Setelah server berjalan, Anda dapat mengakses aplikasi melalui browser:
 
 ---
 
-## Fitur Utama
+## Lisensi & Penggunaan
 
-**Manajemen Masjid:**
-- Jadwal Sholat Otomatis (Lokasi & Koordinat)
-- Koreksi Waktu Sholat
-- Manajemen Keuangan (Pemasukan/Pengeluaran)
-- Laporan Kas Bulanan/Tahunan
+Proyek ini bersifat **Open Source** dan bebas digunakan oleh siapa saja, baik untuk keperluan pribadi, komunitas, maupun institusi masjid. Anda diperbolehkan untuk memodifikasi, mendistribusikan ulang, dan menggunakan kode sumber ini tanpa biaya lisensi apa pun.
 
-**Informasi & Layanan:**
-- Manajemen Donatur Tetap
-- Manajemen Kegiatan & Berita
-- Digital Signage View (Mode Layar Penuh untuk TV Masjid)
-- Panel Admin Responsif
+Semoga bermanfaat untuk kemakmuran masjid dan umat.
+

@@ -63,13 +63,18 @@
         </div>
         <hr class="my-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <p class="text-muted small mb-0">
+            <div class="text-muted small">
+                <span class="me-2">
                 {% if site_setting and site_setting.footer_text %}
                     {{ site_setting.footer_text }}
                 {% else %}
                     &copy; {% now "Y" %} {{ SITE_NAME }}. {% trans "Hak cipta dilindungi." %}
                 {% endif %}
-            </p>
+                </span>
+                <span class="d-block d-md-inline mt-1 mt-md-0">
+                    Made with <i class="bi bi-heart-fill text-danger mx-1" style="font-size: 0.8rem;"></i> by <a href="https://www.artonlabs.com" target="_blank" class="text-decoration-none fw-bold text-reset">ArtonLabs</a>
+                </span>
+            </div>
             <div class="d-flex gap-3">
                 <form action="{% url 'set_language' %}" method="post" class="d-flex align-items-center gap-2">
                     {% csrf_token %}
