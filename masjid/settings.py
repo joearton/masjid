@@ -3,15 +3,20 @@ Django settings for masjid project.
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-32)!7*4pobcy0ajw^%p68!e)-6en%wg76lu9w)#ipz_2%(mb=q'
+# Muat file .env
+load_dotenv(BASE_DIR / '.env')
 
-DEBUG = True
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-32)!7*4pobcy0ajw^%p68!e)-6en%wg76lu9w)#ipz_2%(mb=q')
 
-ALLOWED_HOSTS = ['*']
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 't')
+
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', '*').split(',')]
 
 # Application definition
 INSTALLED_APPS = [
