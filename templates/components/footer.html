@@ -14,7 +14,14 @@
                         <small class="text-muted">{{ SITE_TAGLINE }}</small>
                     </div>
                 </div>
-                <p class="text-muted small">{{ profil_masjid.tagline|default:profil_masjid.misi|default:"Masjid yang makmur, sejahtera, dan menjadi pusat kegiatan umat Islam."|truncatewords:15 }}</p>
+                <p class="text-muted small">
+                    {% if profil_masjid %}
+                        {% firstof profil_masjid.tagline profil_masjid.misi "Masjid yang makmur, sejahtera, dan menjadi pusat kegiatan umat Islam." as footer_desc %}
+                        {{ footer_desc|truncatewords:15 }}
+                    {% else %}
+                        Masjid yang makmur, sejahtera, dan menjadi pusat kegiatan umat Islam.
+                    {% endif %}
+                </p>
 
                 {% if site_setting and site_setting.footer_show_social and site_setting.social_links %}
                 <div class="d-flex gap-2 mt-3">
