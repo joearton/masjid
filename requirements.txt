@@ -1,5 +1,9 @@
-adhanpy==1.0.5
-Django==6.0.2
-django_crispy_forms==2.1
-hijridate==2.6.0
-python-dotenv==1.2.1
+Django>=5.0
+django-crispy-forms>=2.1
+crispy-bootstrap5>=0.7
+Pillow>=10.0.1
+adhanpy>=1.0.5
+hijridate>=2.6.0
+python-dotenv>=1.0.0
+pytz>=2024.2
+currency-symbols>=2.0.3
