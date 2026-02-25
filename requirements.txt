@@ -1,0 +1,5 @@
+adhanpy==1.0.5
+Django==6.0.2
+django_crispy_forms==2.1
+hijridate==2.6.0
+python-dotenv==1.2.1
