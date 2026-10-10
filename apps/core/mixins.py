@@ -13,12 +13,28 @@ from django.utils.translation import gettext_lazy as _
 
 
 class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
-    """Mixin to restrict access to staff/admin users only."""
+    """Mixin to restrict access to staff/admin users only.
+
+    Operator Display (apps.core.roles) hanya boleh membuka view dengan `allow_display_operator = True`.
+    """
+    allow_display_operator = False
+    silent_operator_redirect = False  # mis. dasbor: operator langsung diarahkan tanpa pesan
 
     def test_func(self):
-        return self.request.user.is_staff
+        from apps.core.roles import is_display_operator
+        user = self.request.user
+        if not user.is_staff:
+            return False
+        return self.allow_display_operator or not is_display_operator(user)
 
     def handle_no_permission(self):
+        from django.shortcuts import redirect
+        from apps.core.roles import is_display_operator
+        user = self.request.user
+        if user.is_authenticated and user.is_staff and is_display_operator(user):
+            if not self.silent_operator_redirect:
+                messages.info(self.request, _('Akun Operator Display hanya dapat mengelola layar masjid.'))
+            return redirect('display:panel_settings_list')
         if self.request.user.is_authenticated:
             messages.error(self.request, _('Anda tidak memiliki akses ke halaman ini.'))
             from django.shortcuts import redirect
@@ -44,6 +60,13 @@ class PublicDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['page_title'] = str(self.object)
         return context
+
+
+class SuperuserRequiredMixin(StaffRequiredMixin):
+    """Khusus superadmin (mis. kelola pengguna)."""
+
+    def test_func(self):
+        return self.request.user.is_superuser
 
 
 class PanelListView(StaffRequiredMixin, ListView):

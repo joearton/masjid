@@ -21,7 +21,9 @@ def site_settings(request):
     except Exception:
         site_setting = None
 
+    from apps.core.roles import is_display_operator
     return {
+        'is_display_operator': is_display_operator(getattr(request, 'user', None)),
         'SITE_NAME': site_name,
         'SITE_TAGLINE': site_tagline,
         'profil_masjid': profil,

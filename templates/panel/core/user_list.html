@@ -1,0 +1,49 @@
+{% extends "base/panel.html" %}
+{% load i18n %}
+
+{% block panel_content %}
+<div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">{{ page_title }}</h4>
+        <p class="text-muted mb-0">{% trans "Atur siapa yang dapat masuk ke panel dan menu apa saja yang boleh dibuka." %}</p>
+    </div>
+    <a href="{% url 'panel:user_create' %}" class="btn btn-primary"><i class="bi bi-person-plus me-1"></i>{% trans "Tambah Pengguna" %}</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <span class="badge bg-dark mb-2">{% trans "Superadmin" %}</span>
+        <p class="small text-muted mb-0">{% trans "Semua menu, termasuk kelola pengguna. Diatur lewat Django admin." %}</p></div></div></div>
+    <div class="col-md-4"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <span class="badge bg-primary mb-2">{% trans "Pengurus" %}</span>
+        <p class="small text-muted mb-0">{% trans "Semua menu panel: konten, profil, jadwal sholat, keuangan, donatur, layar, pengaturan." %}</p></div></div></div>
+    <div class="col-md-4"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+        <span class="badge bg-warning text-dark mb-2">{% trans "Operator Display" %}</span>
+        <p class="small text-muted mb-0">{% trans "Hanya menu Layar Masjid: tema, layout, slide, running text, iqamah, dan suara monitor." %}</p></div></div></div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light"><tr>
+                <th>{% trans "Pengguna" %}</th><th>{% trans "Peran" %}</th><th>{% trans "Status" %}</th><th>{% trans "Masuk terakhir" %}</th><th class="text-end">{% trans "Aksi" %}</th>
+            </tr></thead>
+            <tbody>
+            {% for u in users %}
+            <tr>
+                <td><div class="fw-semibold">{{ u.get_full_name|default:u.username }}</div><div class="small text-muted">{{ u.username }}{% if u.email %} · {{ u.email }}{% endif %}</div></td>
+                <td>{% if u.role == 'superadmin' %}<span class="badge bg-dark">{% trans "Superadmin" %}</span>
+                    {% elif u.role == 'operator_display' %}<span class="badge bg-warning text-dark">{% trans "Operator Display" %}</span>
+                    {% else %}<span class="badge bg-primary">{% trans "Pengurus" %}</span>{% endif %}</td>
+                <td>{% if u.is_active %}<span class="badge bg-success-subtle text-success">{% trans "Aktif" %}</span>{% else %}<span class="badge bg-secondary-subtle text-secondary">{% trans "Nonaktif" %}</span>{% endif %}</td>
+                <td class="small text-muted">{{ u.last_login|date:"j M Y H:i"|default:"—" }}</td>
+                <td class="text-end">{% if u.role != 'superadmin' %}<a href="{% url 'panel:user_edit' u.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> {% trans "Ubah" %}</a>{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-4">{% trans "Belum ada pengguna panel." %}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

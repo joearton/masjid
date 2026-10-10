@@ -1,7 +1,7 @@
 {% load i18n %}
 <nav class="sidebar" id="sidebar" aria-label="{% trans 'Menu panel' %}">
     <div class="sidebar-header">
-        <a href="{% url 'panel:dashboard' %}" class="d-flex align-items-center gap-2 text-decoration-none">
+        <a href="{% if is_display_operator %}{% url 'display:panel_settings_list' %}{% else %}{% url 'panel:dashboard' %}{% endif %}" class="d-flex align-items-center gap-2 text-decoration-none">
             {% if site_setting and site_setting.logo %}
             <span class="brand-mark has-logo"><img src="{{ site_setting.logo.url }}" alt=""></span>
             {% else %}
@@ -9,12 +9,13 @@
             {% endif %}
             <span class="min-w-0">
                 <span class="d-block fw-bold text-white small text-truncate" style="max-width:170px">{{ SITE_NAME }}</span>
-                <span class="d-block" style="font-size:.7rem;color:rgba(255,255,255,.5)">{% trans "Panel Admin" %}</span>
+                <span class="d-block" style="font-size:.7rem;color:rgba(255,255,255,.5)">{% if is_display_operator %}{% trans "Operator Display" %}{% else %}{% trans "Panel Admin" %}{% endif %}</span>
             </span>
         </a>
     </div>
 
     <div class="sidebar-body">
+        {% if not is_display_operator %}
         <div class="sidebar-label">{% trans "Utama" %}</div>
         <a href="{% url 'panel:dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
             <i class="bi bi-speedometer2"></i> {% trans "Dashboard" %}
@@ -59,13 +60,21 @@
             <i class="bi bi-person-heart"></i> {% trans "Donatur" %}
         </a>
 
+        {% endif %}
         <div class="sidebar-label mt-3">{% trans "Fitur Lain" %}</div>
         <a href="{% url 'display:panel_settings_list' %}" class="sidebar-link {% if 'display' in request.resolver_match.namespace %}active{% endif %}">
             <i class="bi bi-tv"></i> {% trans "Layar Masjid" %}
         </a>
+        {% if not is_display_operator %}
         <a href="{% url 'panel:site_setting' %}" class="sidebar-link {% if request.resolver_match.url_name == 'site_setting' %}active{% endif %}">
             <i class="bi bi-palette"></i> {% trans "Pengaturan Website" %}
         </a>
+        {% endif %}
+        {% if user.is_superuser %}
+        <a href="{% url 'panel:user_list' %}" class="sidebar-link {% if 'user_' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="bi bi-people"></i> {% trans "Pengguna & Peran" %}
+        </a>
+        {% endif %}
 
         <div class="sidebar-label mt-3">{% trans "Akun" %}</div>
         <a href="{% url 'core:home' %}" class="sidebar-link" target="_blank">

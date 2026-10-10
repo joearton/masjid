@@ -56,6 +56,7 @@ class PanelLogoutView(LogoutView):
 
 class PanelDashboardView(StaffRequiredMixin, TemplateView):
     template_name = 'panel/dashboard.html'
+    silent_operator_redirect = True  # operator display langsung ke daftar display
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
