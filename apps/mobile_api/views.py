@@ -110,14 +110,33 @@ LOKASI_PARAMS = [
     OpenApiParameter('lat', float, description='Lintang (GPS) → hisab kriteria Kemenag; wajib bersama lon'),
     OpenApiParameter('lon', float, description='Bujur (GPS)'),
     OpenApiParameter('tz', str, description='Zona waktu IANA perangkat (Asia/Jakarta|Asia/Makassar|Asia/Jayapura); '
-                                            'disarankan bersama lat/lon, wajib di luar Indonesia'),
+                                            'disarankan bersama lat/lon, wajib di luar Indonesia (atau pakai offset)'),
+    OpenApiParameter('offset', int, description='Alternatif tz: selisih UTC perangkat dalam menit '
+                                                '(Dart: DateTime.now().timeZoneOffset.inMinutes), kelipatan 60'),
 ]
+
+OFFSET_ZONES = {420: 'Asia/Jakarta', 480: 'Asia/Makassar', 540: 'Asia/Jayapura'}
+
+
+def offset_zone(raw):
+    try:
+        minutes = int(raw)
+    except ValueError:
+        raise invalid_param('offset', 'offset wajib berupa bilangan bulat menit.')
+    if minutes % 60 or not -720 <= minutes <= 840:
+        raise invalid_param('offset', 'offset harus kelipatan 60 antara -720 dan 840; gunakan tz untuk zona lain.')
+    if minutes in OFFSET_ZONES:
+        return OFFSET_ZONES[minutes]
+    hours = minutes // 60
+    return 'Etc/UTC' if hours == 0 else f'Etc/GMT{-hours:+d}'  # tanda Etc/GMT terbalik menurut POSIX
 
 
 def parse_lokasi(request):
     """(objek lokasi, info lokasi). Tanpa parameter = lokasi masjid (Kotabumi)."""
     params = request.query_params
     kota, lat, lon, tz = (params.get(k, '').strip() for k in ('kota', 'lat', 'lon', 'tz'))
+    if not tz and params.get('offset', '').strip():
+        tz = offset_zone(params['offset'].strip())
     if kota and (lat or lon):
         raise invalid_param('kota', 'Pilih salah satu: kota atau lat/lon.')
     if tz:

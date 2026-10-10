@@ -174,8 +174,17 @@ class LokasiPenggunaTests(TestCase):
         cases = [({'kota': '2622', 'lat': '1', 'lon': '1'}, 400), ({'kota': '9999'}, 404),
                  ({'lat': 'abc', 'lon': '1'}, 400), ({'lat': '48.85', 'lon': '2.35'}, 400),
                  ({'lat': '48.85', 'lon': '2.35', 'tz': 'Europe/Paris'}, 200), ({'lat': '1', 'lon': '1', 'tz': 'Mars/X'}, 400)]
+        cases += [({'lat': '-3.32', 'lon': '114.59', 'offset': '480'}, 200), ({'lat': '1', 'lon': '1', 'offset': '330'}, 400),
+                  ({'lat': '48.85', 'lon': '2.35', 'offset': '120'}, 200)]
         for params, status in cases:
             self.assertEqual(self.client.get(API + 'sholat/', params).status_code, status, params)
+
+    def test_offset_sets_zone(self):
+        data = self.client.get(API + 'sholat/', {'lat': '-3.32', 'lon': '114.59', 'offset': '480'}).json()
+        self.assertEqual(data['lokasi']['timezone'], 'Asia/Makassar')
+        self.assertTrue(data['waktu']['subuh'].endswith('+08:00'))
+        paris = self.client.get(API + 'sholat/', {'lat': '48.85', 'lon': '2.35', 'offset': '120'}).json()
+        self.assertTrue(paris['waktu']['subuh'].endswith('+02:00'))
 
     def test_city_unavailable_is_503(self):
         with mock.patch('urllib.request.urlopen', side_effect=lambda req, *a, **k: (

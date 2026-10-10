@@ -36,7 +36,8 @@ Tanpa parameter = **lokasi masjid** (Kotabumi, Kab. Lampung Utara). `/sholat/` d
   Bila sumber Kemenag untuk kota itu sedang tidak dapat diambil → `503 jadwal_tidak_tersedia`
   (tawarkan lokasi GPS atau jadwal masjid).
 * `?lat=&lon=` (GPS ponsel) — hisab kriteria Kemenag untuk titik itu. Kirim juga `&tz=` (zona IANA perangkat,
-  mis. `Asia/Makassar`); tanpa `tz` server memperkirakan zona dari koordinat (wajib di luar Indonesia).
+  mis. `Asia/Makassar`) atau `&offset=<menit UTC perangkat>` (480 = WITA); tanpa keduanya server memperkirakan zona
+  dari koordinat (wajib di luar Indonesia).
 * `lokasi` pada respons: `{jenis: masjid|kota|koordinat, nama, kota_id, latitude, longitude, timezone}` —
   tampilkan "Jadwal untuk: …". Simpan pilihan pengguna di perangkat; jangan kirim lokasi ke layanan lain.
 
