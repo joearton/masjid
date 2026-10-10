@@ -1,27 +1,14 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from . import catalog
+
 class DisplaySettings(models.Model):
-    THEME_CHOICES = [
-        ('default', _('Default (Hijau Masjid)')),
-        ('blue', _('Biru Laut')),
-        ('dark', _('Dark Mode (Monokrom)')),
-        ('gold', _('Emas Elegan')),
-        ('purple', _('Ungu Modern')),
-        ('nature', _('Nuansa Alam (Coklat)')),
-    ]
-    
-    LAYOUT_CHOICES = [
-        ('classic', _('Classic (Jadwal Kiri, Slide Kanan)')),
-        ('modern', _('Modern (Jadwal Bawah)')),
-        ('sidebar_right', _('Sidebar Kanan')),
-        ('full_slider', _('Full Slider (Jadwal Overlay)')),
-        ('masjid_info', _('Fokus Info Masjid')),
-        ('simple', _('Simple Minimalis')),
-        ('big_clock', _('Jam Besar')),
-    ]
+    THEME_CHOICES = catalog.THEME_CHOICES
+    LAYOUT_CHOICES = catalog.LAYOUT_CHOICES
 
     NOTIFICATION_CHOICES = [
+        ('sholat-lembut.wav', _('Lonceng Lembut')),
         ('notification-1.mp3', _('Notifikasi 1 (Soft)')),
         ('notification-2.mp3', _('Notifikasi 2 (Glass)')),
         ('notification-3.mp3', _('Notifikasi 3 (Bell)')),
@@ -39,6 +26,17 @@ class DisplaySettings(models.Model):
     sholat_notification = models.CharField(_('Suara Masuk Sholat'), max_length=100, choices=NOTIFICATION_CHOICES, default='notification-1.mp3', blank=True)
     custom_notification = models.FileField(_('Upload Suara Custom'), upload_to='display/audio/', blank=True, null=True, help_text=_('Opsional: Upload file audio sendiri'))
     
+    # Adzan, iqamah & sholat berjamaah (menit)
+    peringatan_menit = models.PositiveSmallIntegerField(_('Peringatan menjelang adzan'), default=10, help_text=_('Menit sebelum adzan untuk menampilkan hitung mundur. 0 = nonaktif'))
+    iqamah_subuh = models.PositiveSmallIntegerField(_('Iqamah Subuh'), default=10)
+    iqamah_dzuhur = models.PositiveSmallIntegerField(_('Iqamah Dzuhur'), default=10)
+    iqamah_ashar = models.PositiveSmallIntegerField(_('Iqamah Ashar'), default=10)
+    iqamah_maghrib = models.PositiveSmallIntegerField(_('Iqamah Maghrib'), default=7)
+    iqamah_isya = models.PositiveSmallIntegerField(_('Iqamah Isya'), default=10)
+    durasi_sholat = models.PositiveSmallIntegerField(_('Layar sholat berlangsung'), default=10, help_text=_('Menit layar diredupkan setelah iqamah. 0 = nonaktif'))
+    durasi_jumat = models.PositiveSmallIntegerField(_('Layar khutbah Jumat'), default=40, help_text=_('Menit layar khutbah sejak adzan Jumat. 0 = nonaktif'))
+    tampilkan_imsak = models.BooleanField(_('Tampilkan Imsak'), default=False, help_text=_('Mis. selama Ramadan'))
+
     is_default = models.BooleanField(_('Default Display'), default=False, help_text=_('Jika dicentang, display ini akan muncul di URL /display/ tanpa ID'))
     aktif = models.BooleanField(_('Aktif'), default=True)
     
@@ -52,6 +50,10 @@ class DisplaySettings(models.Model):
     def __str__(self):
         return self.nama
         
+    def iqamah_minutes(self):
+        return {'Subuh': self.iqamah_subuh, 'Dzuhur': self.iqamah_dzuhur, 'Ashar': self.iqamah_ashar,
+                'Maghrib': self.iqamah_maghrib, 'Isya': self.iqamah_isya}
+
     def save(self, *args, **kwargs):
         if self.is_default:
             # Set all other displays to not default
@@ -68,6 +70,7 @@ class DisplaySlide(models.Model):
         ('teks', _('Teks Kustom')),
         ('gambar', _('Gambar')),
         ('donasi', _('Info Donasi')),
+        ('jumat', _('Petugas Jumat')),
     ]
 
     display = models.ForeignKey(DisplaySettings, on_delete=models.CASCADE, related_name='slides', verbose_name=_('Tampilan'), null=True, blank=True)
@@ -86,6 +89,15 @@ class DisplaySlide(models.Model):
         verbose_name = _('Slide Display')
         verbose_name_plural = _('Slide Display')
         ordering = ['urutan', 'updated_at']
+
+    TIPE_IKON = {
+        'sholat': 'bi-clock', 'kas': 'bi-wallet2', 'berita': 'bi-newspaper', 'kegiatan': 'bi-calendar-event',
+        'teks': 'bi-fonts', 'gambar': 'bi-image', 'donasi': 'bi-heart', 'jumat': 'bi-mic',
+    }
+
+    @property
+    def ikon(self):
+        return self.TIPE_IKON.get(self.tipe, 'bi-card-text')
 
     def __str__(self):
         return f"{self.judul} ({self.get_tipe_display()})"

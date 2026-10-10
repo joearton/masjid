@@ -152,5 +152,5 @@ MOBILE_API_CACHE_SECONDS = int(os.environ.get('MOBILE_API_CACHE_SECONDS', '300')
 MASJID_PUBLIC_URL = os.environ.get('MASJID_PUBLIC_URL', 'https://masjid.umko.ac.id')
 
 # Site info (used in context processor)
-SITE_NAME = 'Masjid Al-Ikhlas'
+SITE_NAME = os.environ.get('SITE_NAME', 'Masjid Sadhan At-Taqwa')  # cadangan; nama utama dari Profil Masjid
 SITE_TAGLINE = 'Masjid yang Makmur dan Sejahtera'

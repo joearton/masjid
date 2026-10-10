@@ -31,6 +31,7 @@
                     {% if not site_setting or site_setting.tampilkan_keuangan %}
                     <li class="nav-item"><a class="nav-link {% if ns == 'keuangan' %}active{% endif %}" {% if ns == 'keuangan' %}aria-current="page"{% endif %} href="{% url 'keuangan:index' %}"><i class="bi bi-wallet2" aria-hidden="true"></i>{% trans "Keuangan" %}</a></li>
                     {% endif %}
+                    <li class="nav-item"><a class="nav-link {% if ns == 'display' %}active{% endif %}" href="{% url 'display:index' %}" target="_blank" rel="noopener" title="{% trans 'Buka monitor masjid (layar TV) di tab baru' %}"><i class="bi bi-display" aria-hidden="true"></i>{% trans "Monitor" %}</a></li>
                 </ul>
                 <div class="d-grid d-lg-flex gap-2 ms-lg-3 mt-3 mt-lg-0">
                     {% if site_setting and site_setting.tampilkan_donasi %}

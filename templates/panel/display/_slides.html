@@ -1,0 +1,33 @@
+{% load i18n %}
+{% for s in slides %}
+<li class="slide-row{% if not s.aktif %} is-off{% endif %}" data-id="{{ s.pk }}"
+    data-judul="{{ s.judul }}" data-tipe="{{ s.tipe }}" data-durasi="{{ s.durasi }}" data-aktif="{{ s.aktif|yesno:'true,false' }}"
+    data-konten="{{ s.konten_teks }}" data-gambar="{% if s.gambar %}{{ s.gambar.url }}{% endif %}">
+    <span class="slide-drag" title="{% trans 'Seret untuk mengurutkan' %}" aria-label="{% trans 'Seret untuk mengurutkan' %}"><i class="bi bi-grip-vertical"></i></span>
+    <span class="slide-ico">{% if s.tipe == 'gambar' and s.gambar %}<img src="{{ s.gambar.url }}" alt="">{% else %}<i class="bi {{ s.ikon }}"></i>{% endif %}</span>
+    <button type="button" class="slide-main" data-act="edit">
+        <span class="slide-title">{{ s.judul }}</span>
+        <span class="slide-meta">{{ s.get_tipe_display }}{% if s.konten_teks and s.tipe == 'teks' %} · {{ s.konten_teks|truncatechars:40 }}{% endif %}</span>
+    </button>
+    <label class="slide-dur" title="{% trans 'Durasi tampil' %}">
+        <input type="number" min="3" max="600" value="{{ s.durasi }}" data-act="durasi" aria-label="{% trans 'Durasi (detik)' %}"><span>{% trans "dtk" %}</span>
+    </label>
+    <div class="form-check form-switch m-0" title="{% trans 'Tampilkan di monitor' %}">
+        <input class="form-check-input" type="checkbox" role="switch" data-act="aktif" {% if s.aktif %}checked{% endif %} aria-label="{% trans 'Aktif' %}">
+    </div>
+    <div class="dropdown">
+        <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-label="{% trans 'Aksi' %}"><i class="bi bi-three-dots-vertical"></i></button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li><button class="dropdown-item" type="button" data-act="edit"><i class="bi bi-pencil me-2"></i>{% trans "Ubah" %}</button></li>
+            <li><button class="dropdown-item" type="button" data-act="duplicate"><i class="bi bi-copy me-2"></i>{% trans "Duplikat" %}</button></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><button class="dropdown-item text-danger" type="button" data-act="delete"><i class="bi bi-trash me-2"></i>{% trans "Hapus" %}</button></li>
+        </ul>
+    </div>
+</li>
+{% empty %}
+<li class="slide-empty">
+    <i class="bi bi-collection-play"></i>
+    <p class="mb-0">{% trans "Belum ada slide. Pilih template di bawah untuk mulai." %}</p>
+</li>
+{% endfor %}

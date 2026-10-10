@@ -1,82 +1,67 @@
 {% extends "base/panel.html" %}
 {% load i18n %}
 
+{% block extra_css %}
+<style>
+    .dsp-card { border: 1px solid var(--line); border-radius: 18px; background: #fff; overflow: hidden; height: 100%; display: flex; flex-direction: column; transition: var(--transition); }
+    .dsp-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+    .dsp-thumb { display: block; position: relative; background: #111827; padding: 10px 10px 0; }
+    .dsp-thumb svg { display: block; width: 100%; border-radius: 8px 8px 0 0; }
+    .dsp-thumb .tb-bg { fill: var(--b); } .dsp-thumb .tb-p { fill: var(--p); } .dsp-thumb .tb-s { fill: rgba(255,255,255,.16); }
+    .dsp-thumb .tb-h { fill: rgba(255,255,255,.75); } .dsp-thumb .tb-a { fill: var(--a); } .dsp-thumb .tb-led { fill: #ff3b3b; }
+    .dsp-thumb .tb-ring { fill: rgba(0,0,0,.35); stroke: var(--a); stroke-width: 2; } .dsp-thumb .tb-hand { stroke: #fff; stroke-width: 2.5; stroke-linecap: round; }
+    .dsp-thumb .tb-frame { fill: var(--b); stroke: var(--a); stroke-width: 1.5; } .dsp-thumb .tb-orn { fill: var(--p); }
+    .dsp-thumb .dsp-badges { position: absolute; top: 16px; left: 16px; display: flex; gap: .3rem; }
+    .dsp-card.is-off .dsp-thumb svg { filter: grayscale(1) brightness(.7); }
+    .dsp-body { padding: 1rem 1.1rem; flex: 1; }
+    .dsp-meta { font-size: .8rem; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: .25rem .9rem; }
+    .dsp-foot { display: flex; gap: .5rem; align-items: center; padding: .75rem 1.1rem; border-top: 1px solid var(--line); background: var(--bg-soft); }
+</style>
+{% endblock %}
+
 {% block panel_content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-4">
     <div>
         <h4 class="fw-bold mb-1">{{ page_title }}</h4>
-        <p class="text-muted mb-0">{% trans "Kelola tampilan layar informasi masjid Anda." %}</p>
+        <p class="text-muted mb-0">{% trans "Atur layar TV masjid. Perubahan langsung tampil di monitor dalam hitungan detik." %}</p>
     </div>
-    <a href="{{ create_url }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg me-1"></i>{% trans "Tambah Display" %}
-    </a>
+    <a href="{{ create_url }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>{% trans "Tambah Display" %}</a>
 </div>
 
 <div class="row g-4">
     {% for display in object_list %}
-    <div class="col-md-6 col-lg-4">
-        <div class="card h-100 border-0 shadow-sm">
-            <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-start">
-                <div>
-                    <h5 class="fw-bold mb-1">{{ display.nama }}</h5>
-                    <span class="badge {% if display.aktif %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
-                        {% if display.aktif %}{% trans "Aktif" %}{% else %}{% trans "Nonaktif" %}{% endif %}
-                    </span>
-                    {% if display.is_default %}
-                    <span class="badge bg-primary-subtle text-primary">{% trans "Default" %}</span>
-                    {% endif %}
+    <div class="col-sm-6 col-xl-4">
+        <div class="dsp-card{% if not display.aktif %} is-off{% endif %}" data-display="{{ display.pk }}">
+            <a class="dsp-thumb" href="{% url 'display:panel_settings_edit' pk=display.pk %}" style="{{ display.theme_style }}" aria-label="{% trans 'Atur' %} {{ display.nama }}">
+                {{ display.layout_svg }}
+                <span class="dsp-badges">
+                    {% if display.is_default %}<span class="badge bg-primary">{% trans "Bawaan" %}</span>{% endif %}
+                    <span class="badge {% if display.aktif %}bg-success{% else %}bg-secondary{% endif %}" data-aktif-badge>{% if display.aktif %}{% trans "Aktif" %}{% else %}{% trans "Nonaktif" %}{% endif %}</span>
+                </span>
+            </a>
+            <div class="dsp-body">
+                <h5 class="fw-bold mb-2">{{ display.nama }}</h5>
+                <div class="dsp-meta">
+                    <span><i class="bi bi-droplet-half me-1"></i>{{ display.get_tema_display }}</span>
+                    <span><i class="bi bi-grid-1x2 me-1"></i>{{ display.get_layout_display }}</span>
+                    <span><i class="bi bi-collection-play me-1"></i>{{ display.slide_aktif }}/{{ display.slide_total }} {% trans "slide aktif" %}</span>
                 </div>
+            </div>
+            <div class="dsp-foot">
+                <a href="{% url 'display:panel_settings_edit' pk=display.pk %}" class="btn btn-primary btn-sm flex-grow-1"><i class="bi bi-sliders me-1"></i>{% trans "Atur" %}</a>
+                <a href="{% url 'display:detail' pk=display.pk %}" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm" title="{% trans 'Buka monitor' %}"><i class="bi bi-box-arrow-up-right"></i></a>
                 <div class="dropdown">
-                    <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-three-dots-vertical"></i>
-                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown" aria-label="{% trans 'Aksi lain' %}"><i class="bi bi-three-dots"></i></button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                        <li>
-                            <a class="dropdown-item" href="{% url 'display:detail' pk=display.pk %}" target="_blank">
-                                <i class="bi bi-eye me-2"></i>{% trans "Preview" %}
-                            </a>
-                        </li>
+                        <li><button class="dropdown-item" type="button" data-toggle-aktif data-url="{% url 'display:ajax_display_save' pk=display.pk %}" data-aktif="{{ display.aktif|yesno:'true,false' }}">
+                            <i class="bi bi-power me-2"></i>{% if display.aktif %}{% trans "Nonaktifkan" %}{% else %}{% trans "Aktifkan" %}{% endif %}</button></li>
+                        {% if not display.is_default %}
+                        <li><button class="dropdown-item" type="button" data-make-default data-url="{% url 'display:ajax_display_save' pk=display.pk %}"><i class="bi bi-star me-2"></i>{% trans "Jadikan bawaan" %}</button></li>
+                        {% endif %}
+                        <li><button class="dropdown-item" type="button" data-duplicate data-url="{% url 'display:ajax_display_duplicate' pk=display.pk %}"><i class="bi bi-copy me-2"></i>{% trans "Duplikat" %}</button></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'display:panel_settings_edit' pk=display.pk %}">
-                                <i class="bi bi-pencil me-2"></i>{% trans "Edit Pengaturan" %}
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'display:panel_slide_list' display_pk=display.pk %}">
-                                <i class="bi bi-images me-2"></i>{% trans "Kelola Slide" %}
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item text-danger" href="{% url 'display:panel_settings_delete' pk=display.pk %}">
-                                <i class="bi bi-trash me-2"></i>{% trans "Hapus" %}
-                            </a>
-                        </li>
+                        <li><a class="dropdown-item text-danger" href="{% url 'display:panel_settings_delete' pk=display.pk %}"><i class="bi bi-trash me-2"></i>{% trans "Hapus" %}</a></li>
                     </ul>
-                </div>
-            </div>
-            <div class="card-body px-4">
-                <div class="d-flex flex-column gap-2 text-muted small mt-2">
-                    <div class="d-flex justify-content-between">
-                        <span>{% trans "Tema" %}</span>
-                        <span class="fw-medium text-dark">{{ display.get_tema_display }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span>{% trans "Layout" %}</span>
-                        <span class="fw-medium text-dark">{{ display.get_layout_display }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span>{% trans "Jml Slide" %}</span>
-                        <span class="fw-medium text-dark">{{ display.slides.count }} slide</span>
-                    </div>
-                </div>
-            </div>
-            <div class="card-footer bg-light border-0 px-4 py-3">
-                <div class="d-grid gap-2">
-                    <a href="{% url 'display:panel_slide_list' display_pk=display.pk %}" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-images me-1"></i>{% trans "Kelola Slide" %}
-                    </a>
                 </div>
             </div>
         </div>
@@ -86,11 +71,38 @@
         <div class="empty-state text-center py-5">
             <i class="bi bi-tv display-4 text-muted"></i>
             <p class="text-muted mt-3">{% trans "Belum ada display yang dibuat." %}</p>
-            <a href="{{ create_url }}" class="btn btn-primary mt-2">
-                {% trans "Buat Display Pertama" %}
-            </a>
+            <a href="{{ create_url }}" class="btn btn-primary mt-2">{% trans "Buat Display Pertama" %}</a>
         </div>
     </div>
     {% endfor %}
 </div>
+{% include "panel/includes/_pagination.html" %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var CSRF = '{{ csrf_token }}';
+    function post(url, data) {
+        var fd = new FormData();
+        Object.keys(data).forEach(function (k) { fd.append(k, data[k]); });
+        return fetch(url, {method: 'POST', body: fd, headers: {'X-CSRFToken': CSRF}, credentials: 'same-origin'})
+            .then(function (r) { return r.json().then(function (j) { if (!r.ok || !j.ok) throw j; return j; }); });
+    }
+    function fail() { alert('Gagal menyimpan. Muat ulang halaman lalu coba lagi.'); }
+    document.querySelectorAll('[data-toggle-aktif]').forEach(function (b) {
+        b.addEventListener('click', function () {
+            post(b.dataset.url, {aktif: b.dataset.aktif === 'true' ? 'false' : 'true'}).then(function () { location.reload(); }, fail);
+        });
+    });
+    document.querySelectorAll('[data-make-default]').forEach(function (b) {
+        b.addEventListener('click', function () { post(b.dataset.url, {is_default: 'true'}).then(function () { location.reload(); }, fail); });
+    });
+    document.querySelectorAll('[data-duplicate]').forEach(function (b) {
+        b.addEventListener('click', function () {
+            if (confirm('Buat salinan display ini beserta semua slidenya?')) post(b.dataset.url, {}).then(function (j) { location.href = j.url; }, fail);
+        });
+    });
+})();
+</script>
 {% endblock %}

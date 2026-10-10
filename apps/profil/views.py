@@ -1,4 +1,5 @@
 """Profil views — public and admin panel."""
+from django.conf import settings
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
@@ -46,7 +47,7 @@ class PanelProfilUpdateView(PanelUpdateView):
 
     def get_object(self, queryset=None):
         obj, _ = ProfilMasjid.objects.get_or_create(
-            pk=1, defaults={'nama': 'Masjid Al-Ikhlas', 'sejarah': '-', 'visi': '-', 'misi': '-', 'alamat': '-'}
+            pk=1, defaults={'nama': settings.SITE_NAME, 'sejarah': '-', 'visi': '-', 'misi': '-', 'alamat': '-'}
         )
         return obj
 

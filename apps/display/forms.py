@@ -31,6 +31,22 @@ class DisplaySettingsForm(forms.ModelForm):
                 'video_url',
             ),
             Fieldset(
+                _('Adzan, Iqamah & Sholat (menit)'),
+                Row(
+                    Column('iqamah_subuh', css_class='col-6 col-md'),
+                    Column('iqamah_dzuhur', css_class='col-6 col-md'),
+                    Column('iqamah_ashar', css_class='col-6 col-md'),
+                    Column('iqamah_maghrib', css_class='col-6 col-md'),
+                    Column('iqamah_isya', css_class='col-6 col-md'),
+                ),
+                Row(
+                    Column('peringatan_menit', css_class='col-md-4'),
+                    Column('durasi_sholat', css_class='col-md-4'),
+                    Column('durasi_jumat', css_class='col-md-4'),
+                ),
+                'tampilkan_imsak',
+            ),
+            Fieldset(
                 _('Suara Notifikasi Sholat'),
                 Row(
                     Column('sholat_notification', css_class='col-md-6'),

@@ -185,8 +185,13 @@ img { max-width: 100%; }
 }
 @media (min-width: 992px) {
     .site-navbar .nav-link i { display: none; }
+    .site-navbar .nav-link, .site-navbar .btn { white-space: nowrap; }
     /* blur hanya di desktop: backdrop-filter menjadikan navbar containing block bagi offcanvas (fixed) di ponsel */
     .site-navbar { background: rgba(255,255,255,.94); backdrop-filter: saturate(160%) blur(12px); -webkit-backdrop-filter: saturate(160%) blur(12px); }
+}
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .site-navbar .nav-link { padding: .5rem .55rem !important; font-size: .88rem; }
+    .brand-tagline { display: none !important; }
 }
 @media (max-width: 991.98px) {
     .site-navbar .offcanvas { max-width: 86vw; }

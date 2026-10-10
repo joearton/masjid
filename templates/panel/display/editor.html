@@ -1,0 +1,704 @@
+{% extends "base/panel.html" %}
+{% load i18n static %}
+
+{% block extra_css %}
+<style>
+    .ed-head { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-bottom: 1.25rem; }
+    .ed-name { font-size: 1.35rem; font-weight: 800; border: 1px solid transparent; border-radius: 10px; padding: .2rem .5rem; margin-left: -.5rem; background: transparent; min-width: 0; width: 100%; max-width: 420px; color: var(--ink); }
+    .ed-name:hover { border-color: var(--line); }
+    .ed-name:focus { border-color: var(--primary); outline: none; background: #fff; }
+    .ed-status { font-size: .82rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: .35rem; white-space: nowrap; }
+    .ed-status.is-saving { color: #b45309; }
+    .ed-status.is-saved { color: var(--primary); }
+    .ed-status.is-error { color: #dc2626; }
+
+    .ed-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: .35rem; margin-bottom: 1rem; }
+    .ed-tabs::-webkit-scrollbar { display: none; }
+    .ed-tabs .nav-link { white-space: nowrap; border-radius: 999px; font-weight: 600; font-size: .9rem; color: var(--text-dark); background: #fff; border: 1px solid var(--line); padding: .45rem 1rem; }
+    .ed-tabs .nav-link.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .ed-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 1.1rem 1.2rem; margin-bottom: 1rem; }
+    .ed-card h6 { font-weight: 800; margin-bottom: .2rem; }
+    .ed-card .hint { font-size: .82rem; color: var(--text-muted); margin-bottom: .9rem; }
+
+    .opt-grid { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); }
+    .opt { position: relative; cursor: pointer; margin: 0; }
+    .opt input { position: absolute; opacity: 0; pointer-events: none; }
+    .opt-box { display: block; border: 2px solid var(--line); border-radius: 14px; padding: .45rem; transition: var(--transition); background: #fff; height: 100%; }
+    .opt:hover .opt-box { border-color: color-mix(in srgb, var(--primary) 45%, #fff); }
+    .opt input:checked + .opt-box { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+    .opt input:focus-visible + .opt-box { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .opt input:checked + .opt-box::after { content: "\F26E"; font-family: bootstrap-icons; position: absolute; top: 6px; right: 8px; background: var(--primary); color: #fff; border-radius: 50%; width: 20px; height: 20px; font-size: .8rem; display: grid; place-items: center; }
+    .opt-label { display: block; font-size: .8rem; font-weight: 700; margin-top: .4rem; line-height: 1.2; }
+    .opt-sub { display: block; font-size: .72rem; color: var(--text-muted); line-height: 1.25; }
+    .swatch { display: block; height: 54px; border-radius: 9px; background: var(--b); position: relative; overflow: hidden; }
+    .swatch::before { content: ""; position: absolute; left: 8px; right: 38%; top: 10px; bottom: 10px; border-radius: 6px; background: var(--p); }
+    .swatch::after { content: ""; position: absolute; right: 8px; width: 24%; top: 10px; height: 10px; border-radius: 4px; background: var(--a); }
+    .layout-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .layout-grid svg { display: block; width: 100%; border-radius: 8px; }
+    .tb-bg { fill: var(--b); } .tb-p { fill: var(--p); } .tb-s { fill: rgba(255,255,255,.16); } .tb-h { fill: rgba(255,255,255,.75); }
+    .tb-a { fill: var(--a); } .tb-led { fill: #ff3b3b; } .tb-ring { fill: rgba(0,0,0,.35); stroke: var(--a); stroke-width: 2; }
+    .tb-hand { stroke: #fff; stroke-width: 2.5; stroke-linecap: round; } .tb-frame { fill: var(--b); stroke: var(--a); stroke-width: 1.5; } .tb-orn { fill: var(--p); }
+
+    .preset-grid { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .preset { display: flex; gap: .6rem; align-items: center; border: 1px solid var(--line); border-radius: 14px; padding: .55rem .65rem; background: #fff; text-align: left; transition: var(--transition); width: 100%; }
+    .preset:hover { border-color: var(--primary); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+    .preset.is-current { border-color: var(--primary); background: var(--primary-light); }
+    .preset-ico { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; flex: none; background: var(--b); color: var(--a); font-size: 1.1rem; box-shadow: inset 0 -6px 0 var(--p); }
+    .preset b { font-size: .84rem; display: block; line-height: 1.2; }
+    .preset small { font-size: .72rem; color: var(--text-muted); }
+
+    .slide-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
+    .slide-row { display: flex; align-items: center; gap: .55rem; border: 1px solid var(--line); border-radius: 14px; padding: .5rem .6rem; background: #fff; }
+    .slide-row.is-off { background: var(--bg-soft); }
+    .slide-row.is-off .slide-title, .slide-row.is-off .slide-ico { opacity: .5; }
+    .slide-row.sortable-ghost { opacity: .4; border-style: dashed; }
+    .slide-row.sortable-chosen { box-shadow: var(--shadow); }
+    .slide-drag { cursor: grab; color: var(--text-muted); font-size: 1.15rem; padding: .25rem 0; touch-action: none; }
+    .slide-ico { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: var(--primary-light); color: var(--primary); flex: none; overflow: hidden; font-size: 1.1rem; }
+    .slide-ico img { width: 100%; height: 100%; object-fit: cover; }
+    .slide-main { flex: 1; min-width: 0; text-align: left; border: 0; background: none; padding: 0; }
+    .slide-title { display: block; font-weight: 700; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .slide-meta { display: block; font-size: .76rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .slide-dur { display: flex; align-items: center; gap: .2rem; margin: 0; font-size: .75rem; color: var(--text-muted); }
+    .slide-dur input { width: 54px; border: 1px solid var(--line); border-radius: 8px; padding: .2rem .35rem; font-size: .85rem; text-align: center; }
+    .slide-empty { text-align: center; color: var(--text-muted); border: 2px dashed var(--line); border-radius: 14px; padding: 1.5rem; }
+    .slide-empty i { font-size: 2rem; display: block; margin-bottom: .4rem; }
+    @media (max-width: 575.98px) { .slide-dur span { display: none; } .slide-dur input { width: 46px; } .slide-ico { display: none; } }
+
+    .tpl-grid { display: grid; gap: .5rem; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .tpl { display: flex; gap: .5rem; align-items: center; border: 1px dashed color-mix(in srgb, var(--primary) 35%, #fff); border-radius: 12px; padding: .5rem .6rem; background: #fff; font-size: .8rem; font-weight: 600; text-align: left; transition: var(--transition); }
+    .tpl:hover { background: var(--primary-light); border-style: solid; }
+    .tpl i { color: var(--primary); font-size: 1rem; }
+
+    .stepper { display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #fff; }
+    .stepper button { border: 0; background: var(--bg-soft); width: 38px; font-size: 1.1rem; color: var(--text-dark); }
+    .stepper button:hover { background: var(--primary-light); color: var(--primary); }
+    .stepper input { border: 0; width: 100%; min-width: 0; text-align: center; font-weight: 700; font-size: 1.05rem; }
+    .stepper input:focus { outline: none; }
+    .field-label { font-size: .78rem; font-weight: 700; color: var(--text-muted); margin-bottom: .3rem; display: block; }
+
+    .pv-wrap { position: sticky; top: calc(var(--topbar-height) + 1rem); }
+    .pv-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; background: #0f172a; box-shadow: 0 0 0 6px #111827, 0 14px 30px rgba(15,23,42,.25); }
+    .pv-frame.is-portrait { aspect-ratio: 9 / 16; max-height: 70vh; margin: 0 auto; width: auto; }
+    .pv-frame iframe { position: absolute; top: 0; left: 0; border: 0; transform-origin: 0 0; pointer-events: none; }
+    .pv-loading { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255,255,255,.6); font-size: .85rem; background: rgba(15,23,42,.35); opacity: 0; transition: opacity .2s; pointer-events: none; }
+    .pv-frame.is-loading .pv-loading { opacity: 1; }
+    .pv-stand { width: 22%; height: 10px; margin: 6px auto 0; background: #111827; border-radius: 0 0 8px 8px; }
+    .fase-btns { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .fase-btns .btn { font-size: .78rem; border-radius: 999px; padding: .25rem .7rem; }
+    @media (max-width: 1199.98px) { .pv-wrap { position: static; } }
+    .modal-content { border-radius: 18px; }
+    .tipe-hint { font-size: .8rem; color: var(--text-muted); background: var(--bg-soft); border-radius: 10px; padding: .55rem .75rem; }
+</style>
+{% endblock %}
+
+{% block panel_content %}
+{% with d=object %}
+<div class="ed-head">
+    <a href="{% url 'display:panel_settings_list' %}" class="btn btn-light btn-sm rounded-circle" aria-label="{% trans 'Kembali' %}"><i class="bi bi-arrow-left"></i></a>
+    <div class="flex-grow-1" style="min-width: 220px">
+        <input class="ed-name" id="edName" data-field="nama" value="{{ d.nama }}" maxlength="100" aria-label="{% trans 'Nama display' %}">
+        <div class="ed-status" id="edStatus" role="status" aria-live="polite"><i class="bi bi-cloud-check"></i>{% trans "Perubahan tersimpan otomatis" %}</div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="btnDuplicate"><i class="bi bi-copy me-1"></i>{% trans "Duplikat" %}</button>
+        <a href="{{ preview_url }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm"><i class="bi bi-box-arrow-up-right me-1"></i>{% trans "Buka monitor" %}</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Pratinjau -->
+    <div class="col-xl-5 order-xl-2">
+        <div class="pv-wrap">
+            <div class="ed-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <h6 class="mb-0"><i class="bi bi-display me-1"></i>{% trans "Pratinjau langsung" %}</h6>
+                    <button type="button" class="btn btn-sm btn-light" id="pvReload" title="{% trans 'Muat ulang pratinjau' %}"><i class="bi bi-arrow-clockwise"></i></button>
+                </div>
+                <div class="pv-frame{% if d.layout == 'portrait' %} is-portrait{% endif %}" id="pvFrame">
+                    <iframe id="pvIframe" title="{% trans 'Pratinjau monitor' %}" src="{{ preview_url }}?preview=1&fase=normal" loading="lazy" tabindex="-1"></iframe>
+                    <div class="pv-loading"><span><span class="spinner-border spinner-border-sm me-2"></span>{% trans "Memuat…" %}</span></div>
+                </div>
+                <div class="pv-stand"></div>
+                <div class="fase-btns mt-3" role="group" aria-label="{% trans 'Simulasi tampilan' %}">
+                    <button type="button" class="btn btn-primary" data-fase="normal">{% trans "Normal" %}</button>
+                    <button type="button" class="btn btn-outline-secondary" data-fase="">{% trans "Sesuai jam sekarang" %}</button>
+                    <button type="button" class="btn btn-outline-secondary" data-fase="menjelang">{% trans "Menjelang adzan" %}</button>
+                    <button type="button" class="btn btn-outline-secondary" data-fase="iqamah">{% trans "Iqamah" %}</button>
+                    <button type="button" class="btn btn-outline-secondary" data-fase="sholat">{% trans "Sholat" %}</button>
+                    <button type="button" class="btn btn-outline-secondary" data-fase="khutbah">{% trans "Khutbah" %}</button>
+                </div>
+                <p class="small text-muted mb-0 mt-2"><i class="bi bi-broadcast me-1"></i>{% trans "Monitor yang menyala ikut berubah dalam ±10 detik setelah disimpan." %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pengaturan -->
+    <div class="col-xl-7 order-xl-1">
+        <ul class="nav ed-tabs" role="tablist">
+            <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabTampilan" type="button" role="tab"><i class="bi bi-palette me-1"></i>{% trans "Tampilan" %}</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabSlide" type="button" role="tab"><i class="bi bi-collection-play me-1"></i>{% trans "Slide" %} <span class="badge rounded-pill bg-light text-dark ms-1" id="slideCount">{{ slides|length }}</span></button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabKonten" type="button" role="tab"><i class="bi bi-type me-1"></i>{% trans "Teks & Media" %}</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabSholat" type="button" role="tab"><i class="bi bi-alarm me-1"></i>{% trans "Iqamah & Suara" %}</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabUmum" type="button" role="tab"><i class="bi bi-sliders me-1"></i>{% trans "Umum" %}</button></li>
+        </ul>
+
+        <div class="tab-content" id="themeScope">
+            <!-- TAMPILAN -->
+            <div class="tab-pane fade show active" id="tabTampilan" role="tabpanel">
+                <div class="ed-card">
+                    <h6><i class="bi bi-magic me-1"></i>{% trans "Template siap pakai" %}</h6>
+                    <p class="hint">{% trans "Sekali klik mengganti tema dan layout sekaligus. Bisa disesuaikan lagi di bawah." %}</p>
+                    <div class="preset-grid">
+                        {% for p in presets %}
+                        <button type="button" class="preset" data-preset="{{ p.key }}" data-tema="{{ p.nilai.tema }}" data-layout="{{ p.nilai.layout }}">
+                            <span class="preset-ico"><i class="bi {{ p.ikon }}"></i></span>
+                            <span class="min-w-0"><b>{{ p.nama }}</b><small class="preset-sub"></small></span>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="ed-card">
+                    <h6><i class="bi bi-droplet-half me-1"></i>{% trans "Tema warna" %} <span class="text-muted fw-normal small">({{ themes|length }})</span></h6>
+                    <p class="hint">{% trans "Warna utama, aksen, dan latar layar." %}</p>
+                    <div class="opt-grid" role="radiogroup" aria-label="{% trans 'Tema warna' %}">
+                        {% for key, label, p, a, b in themes %}
+                        <label class="opt" style="--p:{{ p }};--a:{{ a }};--b:{{ b }}">
+                            <input type="radio" name="tema" value="{{ key }}" data-field="tema" {% if d.tema == key %}checked{% endif %}>
+                            <span class="opt-box"><span class="swatch"></span><span class="opt-label">{{ label }}</span></span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="ed-card">
+                    <h6><i class="bi bi-grid-1x2 me-1"></i>{% trans "Layout" %} <span class="text-muted fw-normal small">({{ layouts|length }})</span></h6>
+                    <p class="hint">{% trans "Susunan jam, jadwal, dan slide di layar." %}</p>
+                    <div class="opt-grid layout-grid" id="layoutGrid" role="radiogroup" aria-label="{% trans 'Layout' %}">
+                        {% for key, label, desc, svg in layouts %}
+                        <label class="opt">
+                            <input type="radio" name="layout" value="{{ key }}" data-field="layout" {% if d.layout == key %}checked{% endif %}>
+                            <span class="opt-box">{{ svg }}<span class="opt-label">{{ label }}</span><span class="opt-sub">{{ desc }}</span></span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE -->
+            <div class="tab-pane fade" id="tabSlide" role="tabpanel">
+                <div class="ed-card">
+                    <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                        <div>
+                            <h6><i class="bi bi-collection-play me-1"></i>{% trans "Slide di monitor" %}</h6>
+                            <p class="hint mb-0">{% trans "Seret ikon ⋮⋮ untuk mengurutkan. Sakelar menyembunyikan slide tanpa menghapusnya." %}</p>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-sm flex-shrink-0 text-nowrap" data-new-slide><i class="bi bi-plus-lg me-1"></i>{% trans "Slide" %}</button>
+                    </div>
+                    <ul class="slide-list mt-3" id="slideList">{% include "panel/display/_slides.html" %}</ul>
+                </div>
+                <div class="ed-card">
+                    <h6><i class="bi bi-lightning-charge me-1"></i>{% trans "Tambah dari template" %}</h6>
+                    <p class="hint">{% trans "Pilih template; isinya bisa diubah sebelum disimpan." %}</p>
+                    <div class="tpl-grid">
+                        {% for t in slide_templates %}
+                        <button type="button" class="tpl" data-template="{{ t.key }}"><i class="bi {{ t.ikon }}"></i><span>{{ t.judul }}</span></button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- TEKS & MEDIA -->
+            <div class="tab-pane fade" id="tabKonten" role="tabpanel">
+                <div class="ed-card">
+                    <h6><i class="bi bi-chat-square-text me-1"></i>{% trans "Running text" %}</h6>
+                    <p class="hint">{% trans "Teks berjalan di bagian bawah layar. Tersimpan otomatis saat berhenti mengetik." %}</p>
+                    <textarea class="form-control" rows="3" data-field="running_text" maxlength="2000">{{ d.running_text }}</textarea>
+                    <div class="d-flex flex-wrap gap-1 mt-2">
+                        <button type="button" class="btn btn-sm btn-light" data-append="Mohon nonaktifkan nada dering ponsel saat sholat.">+ {% trans "Nonaktifkan ponsel" %}</button>
+                        <button type="button" class="btn btn-sm btn-light" data-append="Luruskan dan rapatkan shaf.">+ {% trans "Rapatkan shaf" %}</button>
+                        <button type="button" class="btn btn-sm btn-light" data-append="Jagalah kebersihan masjid.">+ {% trans "Kebersihan" %}</button>
+                        <button type="button" class="btn btn-sm btn-light" data-append="Mari makmurkan masjid dengan infaq terbaik.">+ {% trans "Ajakan infaq" %}</button>
+                    </div>
+                </div>
+                <div class="ed-card">
+                    <h6><i class="bi bi-camera-video me-1"></i>{% trans "Video latar" %}</h6>
+                    <p class="hint">{% trans "Opsional. Tautan langsung ke file .mp4 atau .webm; kosongkan untuk foto latar bawaan." %}</p>
+                    <input type="url" class="form-control" data-field="video_url" value="{{ d.video_url|default:'' }}" placeholder="https://…/latar.mp4">
+                    <div class="invalid-feedback" data-error="video_url"></div>
+                </div>
+            </div>
+
+            <!-- IQAMAH & SUARA -->
+            <div class="tab-pane fade" id="tabSholat" role="tabpanel">
+                <div class="ed-card">
+                    <h6><i class="bi bi-hourglass-split me-1"></i>{% trans "Jeda adzan ke iqamah (menit)" %}</h6>
+                    <p class="hint">{% trans "Hitung mundur iqamah tampil penuh di layar setelah adzan. 0 = tanpa hitung mundur." %}</p>
+                    <div class="row g-2">
+                        {% for field, label in iqamah_fields %}
+                        <div class="col-6 col-md">
+                            <span class="field-label">{{ label }}</span>
+                            <div class="stepper"><button type="button" data-step="-1" aria-label="{% trans 'Kurangi' %}">−</button><input type="number" min="0" max="60" data-field="{{ field }}" value="{% if field == 'iqamah_subuh' %}{{ d.iqamah_subuh }}{% elif field == 'iqamah_dzuhur' %}{{ d.iqamah_dzuhur }}{% elif field == 'iqamah_ashar' %}{{ d.iqamah_ashar }}{% elif field == 'iqamah_maghrib' %}{{ d.iqamah_maghrib }}{% else %}{{ d.iqamah_isya }}{% endif %}" aria-label="{% trans 'Iqamah' %} {{ label }}"><button type="button" data-step="1" aria-label="{% trans 'Tambah' %}">+</button></div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="ed-card">
+                    <h6><i class="bi bi-stopwatch me-1"></i>{% trans "Durasi layar khusus (menit)" %}</h6>
+                    <p class="hint">{% trans "0 = nonaktif." %}</p>
+                    <div class="row g-3">
+                        <div class="col-md-4"><span class="field-label">{% trans "Peringatan menjelang adzan" %}</span>
+                            <div class="stepper"><button type="button" data-step="-1">−</button><input type="number" min="0" max="60" data-field="peringatan_menit" value="{{ d.peringatan_menit }}" aria-label="{% trans 'Peringatan menjelang adzan' %}"><button type="button" data-step="1">+</button></div></div>
+                        <div class="col-md-4"><span class="field-label">{% trans "Layar sholat berlangsung" %}</span>
+                            <div class="stepper"><button type="button" data-step="-1">−</button><input type="number" min="0" max="60" data-field="durasi_sholat" value="{{ d.durasi_sholat }}" aria-label="{% trans 'Layar sholat berlangsung' %}"><button type="button" data-step="1">+</button></div></div>
+                        <div class="col-md-4"><span class="field-label">{% trans "Layar khutbah Jumat" %}</span>
+                            <div class="stepper"><button type="button" data-step="-5">−</button><input type="number" min="0" max="120" data-field="durasi_jumat" value="{{ d.durasi_jumat }}" aria-label="{% trans 'Layar khutbah Jumat' %}"><button type="button" data-step="5">+</button></div></div>
+                    </div>
+                </div>
+                <div class="ed-card">
+                    <h6><i class="bi bi-volume-up me-1"></i>{% trans "Suara masuk waktu sholat" %}</h6>
+                    <p class="hint">{% trans "Berbunyi saat adzan dan saat iqamah. Suara unggahan sendiri menggantikan pilihan bawaan." %}</p>
+                    <div class="d-flex gap-2">
+                        <select class="form-select" data-field="sholat_notification" id="soundSelect" aria-label="{% trans 'Suara bawaan' %}">
+                            {% for val, label in notification_choices %}<option value="{{ val }}" {% if d.sholat_notification == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                        </select>
+                        <button type="button" class="btn btn-outline-primary flex-shrink-0" id="soundPlay" title="{% trans 'Dengarkan' %}"><i class="bi bi-play-fill"></i></button>
+                    </div>
+                    <div class="mt-3 p-3 rounded-3" style="background: var(--bg-soft)">
+                        <div id="customSound" class="small mb-2 {% if not d.custom_notification %}d-none{% endif %}">
+                            <i class="bi bi-music-note-beamed text-primary me-1"></i><span id="customSoundName">{% if d.custom_notification %}{{ d.custom_notification.name|cut:"display/audio/" }}{% endif %}</span>
+                            <button type="button" class="btn btn-link btn-sm p-0 ms-2" id="customPlay">{% trans "Putar" %}</button>
+                            <button type="button" class="btn btn-link btn-sm p-0 ms-2 text-danger" id="customRemove">{% trans "Hapus" %}</button>
+                        </div>
+                        <label class="btn btn-sm btn-outline-secondary mb-0"><i class="bi bi-upload me-1"></i>{% trans "Unggah suara sendiri" %}
+                            <input type="file" accept=".mp3,.ogg,.wav,.m4a,audio/*" id="customUpload" hidden></label>
+                        <span class="small text-muted ms-1">MP3/OGG/WAV, maks. 5 MB</span>
+                        <div class="text-danger small mt-1" data-error="custom_notification"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UMUM -->
+            <div class="tab-pane fade" id="tabUmum" role="tabpanel">
+                <div class="ed-card">
+                    <div class="form-check form-switch d-flex gap-3 align-items-start ps-0 mb-3">
+                        <input class="form-check-input ms-0 mt-1 flex-shrink-0" type="checkbox" role="switch" id="swAktif" data-field="aktif" {% if d.aktif %}checked{% endif %}>
+                        <label class="form-check-label" for="swAktif"><b>{% trans "Aktif" %}</b><br><span class="small text-muted">{% trans "Display nonaktif tidak bisa dibuka di monitor." %}</span></label>
+                    </div>
+                    <div class="form-check form-switch d-flex gap-3 align-items-start ps-0 mb-3">
+                        <input class="form-check-input ms-0 mt-1 flex-shrink-0" type="checkbox" role="switch" id="swDefault" data-field="is_default" {% if d.is_default %}checked{% endif %}>
+                        <label class="form-check-label" for="swDefault"><b>{% trans "Display bawaan" %}</b><br><span class="small text-muted">{% trans "Tampil di alamat /display/ dan menu Monitor." %}</span></label>
+                    </div>
+                    <div class="form-check form-switch d-flex gap-3 align-items-start ps-0">
+                        <input class="form-check-input ms-0 mt-1 flex-shrink-0" type="checkbox" role="switch" id="swImsak" data-field="tampilkan_imsak" {% if d.tampilkan_imsak %}checked{% endif %}>
+                        <label class="form-check-label" for="swImsak"><b>{% trans "Tampilkan Imsak" %}</b><br><span class="small text-muted">{% trans "Mis. selama Ramadan." %}</span></label>
+                    </div>
+                </div>
+                <div class="ed-card">
+                    <h6>{% trans "Alamat monitor ini" %}</h6>
+                    <p class="hint">{% trans "Buka alamat ini di peramban TV lalu pilih layar penuh." %}</p>
+                    <div class="input-group">
+                        <input class="form-control" readonly value="{{ request.scheme }}://{{ request.get_host }}{{ preview_url }}" id="monitorUrl">
+                        <button class="btn btn-outline-primary" type="button" id="copyUrl"><i class="bi bi-clipboard"></i></button>
+                    </div>
+                </div>
+                <div class="ed-card border-danger-subtle">
+                    <h6 class="text-danger">{% trans "Hapus display" %}</h6>
+                    <p class="hint">{% trans "Menghapus display beserta semua slidenya." %}</p>
+                    <a href="{% url 'display:panel_settings_delete' pk=d.pk %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash me-1"></i>{% trans "Hapus display" %}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal slide -->
+<div class="modal fade" id="slideModal" tabindex="-1" aria-labelledby="slideModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
+        <form class="modal-content" id="slideForm" novalidate>
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="slideModalTitle">{% trans "Slide" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Tutup' %}"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="id">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="sfJudul">{% trans "Judul" %}</label>
+                    <input class="form-control" id="sfJudul" name="judul" maxlength="200" required>
+                    <div class="invalid-feedback" data-error="judul"></div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-7">
+                        <label class="form-label fw-semibold" for="sfTipe">{% trans "Jenis" %}</label>
+                        <select class="form-select" id="sfTipe" name="tipe">{% for v, l in slide_types %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select>
+                    </div>
+                    <div class="col-5">
+                        <label class="form-label fw-semibold" for="sfDurasi">{% trans "Durasi (dtk)" %}</label>
+                        <input class="form-control" type="number" id="sfDurasi" name="durasi" min="3" max="600" value="15">
+                        <div class="invalid-feedback" data-error="durasi"></div>
+                    </div>
+                </div>
+                <div class="tipe-hint mb-3" id="sfHint"></div>
+                <div class="mb-3" id="sfKontenWrap">
+                    <label class="form-label fw-semibold" for="sfKonten" id="sfKontenLabel">{% trans "Isi teks" %}</label>
+                    <textarea class="form-control" id="sfKonten" name="konten_teks" rows="5"></textarea>
+                </div>
+                <div class="mb-3" id="sfGambarWrap">
+                    <label class="form-label fw-semibold" for="sfGambar">{% trans "Gambar / poster" %}</label>
+                    <div id="sfGambarNow" class="mb-2 d-none"><img src="" alt="" class="rounded-3" style="max-height:140px;max-width:100%">
+                        <div class="form-check mt-1"><input class="form-check-input" type="checkbox" id="sfHapusGambar"><label class="form-check-label small" for="sfHapusGambar">{% trans "Hapus gambar ini" %}</label></div></div>
+                    <input class="form-control" type="file" id="sfGambar" name="gambar" accept="image/*">
+                    <div class="invalid-feedback" data-error="gambar"></div>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="sfAktif" checked>
+                    <label class="form-check-label" for="sfAktif">{% trans "Tampilkan di monitor" %}</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans "Batal" %}</button>
+                <button type="submit" class="btn btn-primary" id="sfSubmit"><i class="bi bi-check-lg me-1"></i>{% trans "Simpan slide" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090">
+    <div class="toast align-items-center border-0" id="edToast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex"><div class="toast-body" id="edToastBody"></div><button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="{% trans 'Tutup' %}"></button></div>
+    </div>
+</div>
+
+{{ presets_json|json_script:"presetsData" }}
+{{ themes_json|json_script:"themesData" }}
+{{ layout_labels_json|json_script:"layoutLabels" }}
+{{ slide_templates_json|json_script:"slideTemplates" }}
+{% endwith %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<script>
+(function () {
+    'use strict';
+    var CSRF = '{{ csrf_token }}';
+    var URLS = {
+        save: "{% url 'display:ajax_display_save' pk=object.pk %}",
+        duplicate: "{% url 'display:ajax_display_duplicate' pk=object.pk %}",
+        slideCreate: "{% url 'display:ajax_slide_create' display_pk=object.pk %}",
+        slideReorder: "{% url 'display:ajax_slide_reorder' display_pk=object.pk %}",
+        slideUpdate: "{% url 'display:ajax_slide_update' pk=0 %}",
+        slideDelete: "{% url 'display:ajax_slide_delete' pk=0 %}",
+        slideDuplicate: "{% url 'display:ajax_slide_duplicate' pk=0 %}",
+        preview: "{{ preview_url }}",
+        audio: "{% static 'audio/' %}"
+    };
+    var THEMES = JSON.parse(document.getElementById('themesData').textContent);
+    var LAYOUT_LABEL = JSON.parse(document.getElementById('layoutLabels').textContent);
+    var PRESETS = JSON.parse(document.getElementById('presetsData').textContent);
+    var SLIDE_TPL = JSON.parse(document.getElementById('slideTemplates').textContent);
+    var customSoundUrl = {% if object.custom_notification %}"{{ object.custom_notification.url }}"{% else %}null{% endif %};
+    function slideUrl(base, id) { return base.replace('/0/ajax/', '/' + id + '/ajax/'); }
+
+    // ---------- util ----------
+    function formData(obj) {
+        if (obj instanceof FormData) return obj;
+        var fd = new FormData();
+        Object.keys(obj).forEach(function (k) {
+            var v = obj[k];
+            if (Array.isArray(v)) v.forEach(function (x) { fd.append(k, x); });
+            else fd.append(k, typeof v === 'boolean' ? String(v) : v);
+        });
+        return fd;
+    }
+    function post(url, data) {
+        return fetch(url, {method: 'POST', body: formData(data), headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'fetch'}, credentials: 'same-origin'})
+            .then(function (r) {
+                return r.json().catch(function () { return {ok: false, error: 'Server tidak merespons (' + r.status + ').'}; })
+                    .then(function (j) { if (!r.ok || !j.ok) { if (r.status === 403) j.error = 'Sesi habis atau tidak berhak. Muat ulang halaman lalu masuk lagi.'; throw j; } return j; });
+            }, function () { throw {ok: false, error: 'Tidak ada koneksi internet.'}; });
+    }
+    function errText(e) {
+        if (e && e.errors) return Object.values(e.errors).map(function (v) { return v.join(' '); }).join(' ');
+        return (e && e.error) || 'Gagal menyimpan.';
+    }
+    var toastEl = document.getElementById('edToast'), toast = bootstrap.Toast.getOrCreateInstance(toastEl, {delay: 3500});
+    function notify(msg, ok) {
+        toastEl.className = 'toast align-items-center border-0 text-white ' + (ok === false ? 'bg-danger' : 'bg-success');
+        document.getElementById('edToastBody').textContent = msg;
+        toast.show();
+    }
+    var statusEl = document.getElementById('edStatus'), statusTimer;
+    function status(kind, text) {
+        clearTimeout(statusTimer);
+        var icon = {saving: 'bi-arrow-repeat', saved: 'bi-cloud-check-fill', error: 'bi-exclamation-triangle-fill'}[kind];
+        statusEl.className = 'ed-status is-' + kind;
+        statusEl.innerHTML = '<i class="bi ' + icon + '"></i>';
+        statusEl.appendChild(document.createTextNode(text));
+        if (kind === 'saved') statusTimer = setTimeout(function () { statusEl.className = 'ed-status'; }, 4000);
+    }
+    function debounce(fn, ms) { var t; return function () { var a = arguments, s = this; clearTimeout(t); t = setTimeout(function () { fn.apply(s, a); }, ms); }; }
+
+    // ---------- pratinjau ----------
+    var frame = document.getElementById('pvFrame'), iframe = document.getElementById('pvIframe'), fase = 'normal';
+    function fit() {
+        var portrait = frame.classList.contains('is-portrait');
+        var w = portrait ? 1080 : 1920, h = portrait ? 1920 : 1080;
+        var scale = frame.clientWidth / w;
+        iframe.style.width = w + 'px'; iframe.style.height = h + 'px';
+        iframe.style.transform = 'scale(' + scale + ')';
+    }
+    new ResizeObserver(fit).observe(frame);
+    var reloadPreview = debounce(function () {
+        frame.classList.add('is-loading');
+        iframe.src = URLS.preview + '?preview=1' + (fase ? '&fase=' + fase : '') + '&t=' + Date.now();
+    }, 250);
+    iframe.addEventListener('load', function () { frame.classList.remove('is-loading'); });
+    document.getElementById('pvReload').addEventListener('click', reloadPreview);
+    document.querySelectorAll('[data-fase]').forEach(function (b) {
+        b.addEventListener('click', function () {
+            fase = b.dataset.fase;
+            document.querySelectorAll('[data-fase]').forEach(function (x) { x.className = 'btn ' + (x === b ? 'btn-primary' : 'btn-outline-secondary'); });
+            reloadPreview();
+        });
+    });
+
+    // ---------- simpan pengaturan ----------
+    function applyState(values) {
+        Object.keys(values).forEach(function (k) {
+            document.querySelectorAll('[data-field="' + k + '"]').forEach(function (el) {
+                if (el.type === 'radio') el.checked = el.value === values[k];
+                else if (el.type === 'checkbox') el.checked = !!values[k];
+            });
+        });
+        syncVisuals();
+    }
+    function save(values, okText) {
+        status('saving', 'Menyimpan…');
+        document.querySelectorAll('[data-error]').forEach(function (el) { el.textContent = ''; });
+        document.querySelectorAll('.is-invalid').forEach(function (el) { el.classList.remove('is-invalid'); });
+        return post(URLS.save, values).then(function (j) {
+            status('saved', okText || 'Tersimpan · monitor diperbarui ±10 dtk');
+            reloadPreview();
+            return j;
+        }).catch(function (e) {
+            status('error', errText(e));
+            if (e.errors) Object.keys(e.errors).forEach(function (k) {
+                var holder = document.querySelector('[data-error="' + k + '"]');
+                if (holder) holder.textContent = e.errors[k].join(' ');
+                var input = document.querySelector('[data-field="' + k + '"]');
+                if (input) input.classList.add('is-invalid');
+            });
+            notify(errText(e), false);
+            throw e;
+        });
+    }
+    function valueOf(el) { return el.type === 'checkbox' ? el.checked : el.value; }
+    var pending = {};
+    document.querySelectorAll('[data-field]').forEach(function (el) {
+        var name = el.dataset.field;
+        if (el.type === 'radio' || el.type === 'checkbox' || el.tagName === 'SELECT') {
+            el.addEventListener('change', function () {
+                var v = {}; v[name] = valueOf(el);
+                save(v).then(function (j) {
+                    if (name === 'is_default' && j.display.is_default) notify('Display ini sekarang menjadi bawaan di /display/.');
+                }).catch(function () { if (el.type === 'checkbox') el.checked = !el.checked; });
+                syncVisuals();
+            });
+        } else {
+            var lazy = pending[name] = debounce(function () { var v = {}; v[name] = el.value; save(v).catch(function () {}); }, el.type === 'number' ? 500 : 900);
+            el.addEventListener('input', function () { status('saving', 'Mengetik…'); lazy(); });
+            el.addEventListener('change', lazy);
+        }
+    });
+    document.querySelectorAll('.stepper [data-step]').forEach(function (b) {
+        b.addEventListener('click', function () {
+            var input = b.parentNode.querySelector('input');
+            var v = Math.max(+input.min || 0, Math.min(+input.max || 999, (+input.value || 0) + (+b.dataset.step)));
+            input.value = v;
+            input.dispatchEvent(new Event('input'));
+        });
+    });
+    document.querySelectorAll('[data-append]').forEach(function (b) {
+        b.addEventListener('click', function () {
+            var ta = document.querySelector('[data-field="running_text"]');
+            ta.value = (ta.value.trim() ? ta.value.trim() + ' • ' : '') + b.dataset.append;
+            ta.dispatchEvent(new Event('input'));
+        });
+    });
+
+    // Tema → warna thumbnail layout & preset; layout portrait → bingkai tegak
+    function syncVisuals() {
+        var tema = (document.querySelector('[data-field="tema"]:checked') || {}).value || 'default';
+        var layout = (document.querySelector('[data-field="layout"]:checked') || {}).value || 'classic';
+        var c = THEMES[tema] || THEMES['default'];
+        var grid = document.getElementById('layoutGrid');
+        grid.style.setProperty('--p', c[0]); grid.style.setProperty('--a', c[1]); grid.style.setProperty('--b', c[2]);
+        var portrait = layout === 'portrait';
+        if (frame.classList.contains('is-portrait') !== portrait) { frame.classList.toggle('is-portrait', portrait); fit(); }
+        document.querySelectorAll('.preset').forEach(function (p) {
+            p.classList.toggle('is-current', p.dataset.tema === tema && p.dataset.layout === layout);
+        });
+    }
+    document.querySelectorAll('.preset').forEach(function (p) {
+        var c = THEMES[p.dataset.tema] || THEMES['default'];
+        p.style.setProperty('--p', c[0]); p.style.setProperty('--a', c[1]); p.style.setProperty('--b', c[2]);
+        p.querySelector('.preset-sub').textContent = c[3] + ' · ' + (LAYOUT_LABEL[p.dataset.layout] || '');
+        p.addEventListener('click', function () {
+            var values = PRESETS[p.dataset.preset];
+            var before = {};
+            Object.keys(values).forEach(function (k) { var el = document.querySelector('[data-field="' + k + '"]:checked') || document.querySelector('[data-field="' + k + '"]'); before[k] = el && el.type === 'checkbox' ? el.checked : (el ? el.value : ''); });
+            applyState(values);
+            save(values, 'Template "' + p.querySelector('b').textContent + '" diterapkan')
+                .catch(function () { applyState(before); });
+        });
+    });
+    syncVisuals();
+
+    // ---------- suara ----------
+    var player = new Audio();
+    function play(src) { if (!src) return notify('Tidak ada suara dipilih.', false); player.pause(); player.src = src; player.play().catch(function () { notify('Peramban menolak memutar suara.', false); }); }
+    document.getElementById('soundPlay').addEventListener('click', function () {
+        var v = document.getElementById('soundSelect').value; play(v ? URLS.audio + v : '');
+    });
+    document.getElementById('customPlay').addEventListener('click', function () { play(customSoundUrl); });
+    function showCustom(url) {
+        customSoundUrl = url;
+        document.getElementById('customSound').classList.toggle('d-none', !url);
+        document.getElementById('customSoundName').textContent = url ? decodeURIComponent(url.split('/').pop()) : '';
+    }
+    document.getElementById('customUpload').addEventListener('change', function () {
+        if (!this.files.length) return;
+        var fd = new FormData(); fd.append('custom_notification', this.files[0]);
+        var input = this;
+        save(fd, 'Suara diunggah').then(function (j) { showCustom(j.display.custom_notification); }).catch(function () {}).finally(function () { input.value = ''; });
+    });
+    document.getElementById('customRemove').addEventListener('click', function () {
+        if (!confirm('Hapus suara unggahan? Monitor kembali memakai suara bawaan.')) return;
+        save({hapus_suara: true}, 'Suara unggahan dihapus').then(function () { showCustom(null); }).catch(function () {});
+    });
+
+    // ---------- umum ----------
+    document.getElementById('btnDuplicate').addEventListener('click', function () {
+        if (!confirm('Buat salinan display ini beserta semua slidenya?')) return;
+        post(URLS.duplicate, {}).then(function (j) { location.href = j.url; }).catch(function (e) { notify(errText(e), false); });
+    });
+    document.getElementById('copyUrl').addEventListener('click', function () {
+        var v = document.getElementById('monitorUrl').value;
+        (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(function () { notify('Alamat disalin.'); }, function () { document.getElementById('monitorUrl').select(); });
+    });
+
+    // ---------- slide ----------
+    var list = document.getElementById('slideList');
+    function renderSlides(j) {
+        list.innerHTML = j.html;
+        document.getElementById('slideCount').textContent = j.count;
+        reloadPreview();
+    }
+    function slideAction(url, data, okText) {
+        status('saving', 'Menyimpan…');
+        return post(url, data || {}).then(function (j) { renderSlides(j); status('saved', okText || 'Slide tersimpan'); return j; })
+            .catch(function (e) { status('error', errText(e)); notify(errText(e), false); throw e; });
+    }
+    Sortable.create(list, {
+        handle: '.slide-drag', animation: 160, ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen', filter: '.slide-empty',
+        onEnd: function (ev) {
+            if (ev.oldIndex === ev.newIndex) return;
+            var ids = Array.prototype.map.call(list.querySelectorAll('.slide-row'), function (r) { return r.dataset.id; });
+            slideAction(URLS.slideReorder, {ids: ids}, 'Urutan slide tersimpan').catch(function () {});
+        }
+    });
+    list.addEventListener('change', function (ev) {
+        var row = ev.target.closest('.slide-row'); if (!row) return;
+        var act = ev.target.dataset.act;
+        if (act === 'aktif') slideAction(slideUrl(URLS.slideUpdate, row.dataset.id), {aktif: ev.target.checked}, ev.target.checked ? 'Slide ditampilkan' : 'Slide disembunyikan').catch(function () { ev.target.checked = !ev.target.checked; });
+        if (act === 'durasi') slideAction(slideUrl(URLS.slideUpdate, row.dataset.id), {durasi: ev.target.value}, 'Durasi tersimpan').catch(function () {});
+    });
+    list.addEventListener('click', function (ev) {
+        var btn = ev.target.closest('[data-act]'); if (!btn || btn.tagName === 'INPUT') return;
+        var row = btn.closest('.slide-row'), act = btn.dataset.act;
+        if (act === 'edit') openSlide(row);
+        if (act === 'duplicate') slideAction(slideUrl(URLS.slideDuplicate, row.dataset.id), {}, 'Slide diduplikat').catch(function () {});
+        if (act === 'delete' && confirm('Hapus slide "' + row.dataset.judul + '"?')) slideAction(slideUrl(URLS.slideDelete, row.dataset.id), {}, 'Slide dihapus').catch(function () {});
+    });
+
+    var modalEl = document.getElementById('slideModal'), modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    var form = document.getElementById('slideForm');
+    var HINTS = {
+        teks: ['Teks bebas: pengumuman, doa, hadits, atau ajakan.', 'Isi teks'],
+        gambar: ['Unggah poster atau pamflet; teks di bawah menjadi keterangan gambar.', 'Keterangan (opsional)'],
+        sholat: ['Jadwal sholat hari ini dalam ukuran besar; terisi otomatis.', 'Catatan kaki (opsional)'],
+        jumat: ['Khatib, imam, dan tema Jumat terdekat dari menu Jadwal Jumat.', null],
+        kegiatan: ['Lima kegiatan terdekat dari menu Kegiatan.', null],
+        berita: ['Lima berita terbaru yang sudah terbit.', null],
+        kas: ['Saldo kas serta pemasukan & pengeluaran bulan ini dari menu Keuangan.', null],
+        donasi: ['QRIS, rekening, dan ajakan donasi dari Pengaturan Situs.', null]
+    };
+    function syncTipe() {
+        var t = form.tipe.value, h = HINTS[t] || HINTS.teks;
+        document.getElementById('sfHint').textContent = h[0];
+        document.getElementById('sfKontenWrap').hidden = !h[1];
+        if (h[1]) document.getElementById('sfKontenLabel').textContent = h[1];
+        document.getElementById('sfGambarWrap').hidden = t !== 'gambar';
+    }
+    form.tipe.addEventListener('change', syncTipe);
+    function fillSlide(v, title) {
+        form.reset();
+        form.querySelectorAll('.is-invalid').forEach(function (el) { el.classList.remove('is-invalid'); });
+        form.id.value = v.id || '';
+        form.judul.value = v.judul || '';
+        form.tipe.value = v.tipe || 'teks';
+        form.durasi.value = v.durasi || 15;
+        form.konten_teks.value = v.konten || '';
+        document.getElementById('sfAktif').checked = v.aktif !== false;
+        document.getElementById('sfHapusGambar').checked = false;
+        var now = document.getElementById('sfGambarNow');
+        now.classList.toggle('d-none', !v.gambar);
+        now.querySelector('img').src = v.gambar || '';
+        document.getElementById('slideModalTitle').textContent = title;
+        syncTipe();
+        modal.show();
+    }
+    function openSlide(row) {
+        fillSlide({id: row.dataset.id, judul: row.dataset.judul, tipe: row.dataset.tipe, durasi: row.dataset.durasi,
+                   konten: row.dataset.konten, gambar: row.dataset.gambar, aktif: row.dataset.aktif === 'true'}, 'Ubah slide');
+    }
+    document.querySelector('[data-new-slide]').addEventListener('click', function () { fillSlide({tipe: 'teks', durasi: 15}, 'Slide baru'); });
+    document.querySelectorAll('[data-template]').forEach(function (b) {
+        b.addEventListener('click', function () {
+            var t = SLIDE_TPL[b.dataset.template];
+            fillSlide({judul: t.judul, tipe: t.tipe, durasi: t.durasi, konten: t.konten_teks}, 'Slide dari template');
+        });
+    });
+    modalEl.addEventListener('shown.bs.modal', function () { form.judul.focus(); });
+    form.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        var fd = new FormData();
+        ['judul', 'tipe', 'durasi', 'konten_teks'].forEach(function (k) { fd.append(k, form[k].value); });
+        fd.append('aktif', String(document.getElementById('sfAktif').checked));
+        if (form.gambar.files.length) fd.append('gambar', form.gambar.files[0]);
+        if (document.getElementById('sfHapusGambar').checked) fd.append('hapus_gambar', 'true');
+        var id = form.id.value, btn = document.getElementById('sfSubmit');
+        btn.disabled = true;
+        form.querySelectorAll('.is-invalid').forEach(function (el) { el.classList.remove('is-invalid'); });
+        slideAction(id ? slideUrl(URLS.slideUpdate, id) : URLS.slideCreate, fd, id ? 'Slide diperbarui' : 'Slide ditambahkan')
+            .then(function () { modal.hide(); })
+            .catch(function (e) {
+                if (e.errors) Object.keys(e.errors).forEach(function (k) {
+                    var input = form[k]; if (input) input.classList.add('is-invalid');
+                    var holder = form.querySelector('[data-error="' + k + '"]'); if (holder) holder.textContent = e.errors[k].join(' ');
+                });
+            })
+            .finally(function () { btn.disabled = false; });
+    });
+
+    // Buka tab terakhir (mis. setelah muat ulang)
+    try {
+        var last = localStorage.getItem('display-editor-tab');
+        if (last && document.querySelector('[data-bs-target="' + last + '"]')) bootstrap.Tab.getOrCreateInstance(document.querySelector('[data-bs-target="' + last + '"]')).show();
+        document.querySelectorAll('.ed-tabs [data-bs-toggle="tab"]').forEach(function (t) { t.addEventListener('shown.bs.tab', function () { try { localStorage.setItem('display-editor-tab', t.dataset.bsTarget); } catch (e) {} }); });
+    } catch (e) {}
+})();
+</script>
+{% endblock %}

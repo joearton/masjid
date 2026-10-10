@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Display Masjid - {{ profil.nama }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Orbitron:wght@600;800&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    <title>Monitor · {{ profil.nama|default:SITE_NAME }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Orbitron:wght@600;800&family=Cinzel:wght@700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         /* ============================================
@@ -25,6 +25,10 @@
         }
 
         * { box-sizing: border-box; }
+
+        /* Ukuran dasar mengikuti dimensi layar: 1080p ≈ 18px, 4K ≈ 36px, 720p = 14px.
+           Semua ukuran dalam rem ikut membesar/mengecil sesuai perangkat. */
+        html { font-size: clamp(14px, min(0.95vw, 1.69vh), 44px); }
 
         body {
             margin: 0;
@@ -82,7 +86,7 @@
         }
 
         .clock-time {
-            font-size: 3.5rem;
+            font-size: 5.2rem;
             font-weight: 700;
             line-height: 1;
             font-variant-numeric: tabular-nums;
@@ -90,13 +94,13 @@
         }
 
         .clock-date {
-            font-size: 1.1rem;
+            font-size: 1.35rem;
             opacity: 0.9;
             margin-top: 0.2rem;
         }
 
         .clock-hijri {
-            font-size: 0.95rem;
+            font-size: 1.1rem;
             opacity: 0.75;
             margin-top: 0.15rem;
             font-style: italic;
@@ -108,7 +112,7 @@
         .content-grid {
             flex: 1;
             display: grid;
-            grid-template-columns: 320px 1fr;
+            grid-template-columns: 21rem 1fr;
             gap: 2rem;
             padding: 1rem 3rem 4rem;
             min-height: 0;
@@ -143,8 +147,8 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .prayer-name { font-size: 1.4rem; font-weight: 600; }
-        .prayer-time { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+        .prayer-name { font-size: 1.5rem; font-weight: 600; }
+        .prayer-time { font-size: 2rem; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
         .prayer-item.active .prayer-time { color: #fff; }
 
         /* ============================================
@@ -192,7 +196,7 @@
             text-align: center;
         }
 
-        .slide-text { font-size: 1.8rem; line-height: 1.6; }
+        .slide-text { font-size: 1.8rem; line-height: 1.6; font-family: 'Outfit', 'Amiri', sans-serif; }
 
         .slide-image img {
             max-width: 100%;
@@ -274,35 +278,6 @@
         }
 
         /* ============================================
-           THEME OVERRIDES
-           ============================================ */
-        body.theme-blue {
-            --primary: #0284c7;
-            --accent: #38bdf8;
-            --bg-dark: #082f49;
-        }
-        body.theme-dark {
-            --primary: #334155;
-            --accent: #94a3b8;
-            --bg-dark: #020617;
-        }
-        body.theme-gold {
-            --primary: #713f12;
-            --accent: #fbbf24;
-            --bg-dark: #1c1917;
-        }
-        body.theme-purple {
-            --primary: #6d28d9;
-            --accent: #c4b5fd;
-            --bg-dark: #2e1065;
-        }
-        body.theme-nature {
-            --primary: #3f6212;
-            --accent: #bef264;
-            --bg-dark: #0f1c05;
-        }
-
-        /* ============================================
            LAYOUT: Modern (Prayer at bottom)
            ============================================ */
         body.layout-modern .content-grid {
@@ -333,7 +308,7 @@
            LAYOUT: Sidebar Right
            ============================================ */
         body.layout-sidebar_right .content-grid {
-            grid-template-columns: 1fr 320px;
+            grid-template-columns: 1fr 21rem;
         }
         body.layout-sidebar_right .prayer-list { order: 2; }
         body.layout-sidebar_right .slide-container { order: 1; }
@@ -414,11 +389,11 @@
             margin-top: 0.5rem;
             text-align: center;
         }
-        body.layout-simple .clock-time { font-size: 2.5rem; }
+        body.layout-simple .clock-time { font-size: 4rem; }
         body.layout-simple .clock-date { font-size: 1rem; }
         body.layout-simple .masjid-info h1 { font-size: 2rem; }
         body.layout-simple .content-grid {
-            grid-template-columns: 280px 1fr;
+            grid-template-columns: 18rem 1fr;
             gap: 1.5rem;
         }
         body.layout-simple .prayer-item {
@@ -433,7 +408,7 @@
            LAYOUT: Fokus Info Masjid
            ============================================ */
         body.layout-masjid_info .content-grid {
-            grid-template-columns: 1fr 280px;
+            grid-template-columns: 1fr 18rem;
             gap: 1.5rem;
         }
         body.layout-masjid_info .slide-container { order: 1; }
@@ -599,9 +574,390 @@
             color: var(--gold);
         }
 
+        /* ============================================
+           LAYOUT: Jadwal Atas
+           ============================================ */
+        body.layout-top_bar .content-grid { grid-template-columns: 1fr; grid-template-rows: auto 1fr; gap: 1rem; }
+        body.layout-top_bar .prayer-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 0.8rem; }
+        body.layout-top_bar .prayer-item { flex-direction: column; text-align: center; padding: 0.7rem 0.5rem; }
+        body.layout-top_bar .prayer-item.active { transform: translateY(-3px); }
+        body.layout-top_bar .prayer-name { font-size: 1rem; }
+        body.layout-top_bar .prayer-time { font-size: 1.7rem; }
+
+        /* ============================================
+           LAYOUT: Hitung Mundur (sholat berikutnya raksasa)
+           ============================================ */
+        body.layout-countdown .header { flex: 1; flex-direction: column; justify-content: center; text-align: center; gap: 1rem; background: none; }
+        body.layout-countdown .clock-widget { text-align: center; display: flex; flex-direction: column; align-items: center; }
+        body.layout-countdown .clock-time { font-size: 2.6rem; order: 2; color: #fff; opacity: .85; }
+        body.layout-countdown .clock-date, body.layout-countdown .clock-hijri { order: 3; }
+        body.layout-countdown .next-chip { order: 1; flex-direction: column; align-items: center; gap: 0; background: none; border: 0; font-size: clamp(1.4rem, 3vw, 2.6rem); margin: 0 0 1rem; }
+        body.layout-countdown .next-chip b { font-size: clamp(2.6rem, 6vw, 5.5rem); line-height: 1.1; }
+        body.layout-countdown .next-chip .left { font-family: 'Orbitron', monospace; font-size: clamp(4rem, 11vw, 10rem); color: #fff; line-height: 1; }
+        body.layout-countdown .content-grid { flex: none; display: block; padding: 0 3rem 5rem; }
+        body.layout-countdown .slide-container { display: none; }
+        body.layout-countdown .prayer-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 0.8rem; }
+        body.layout-countdown .prayer-item { flex-direction: column; text-align: center; padding: 0.8rem 0.4rem; }
+        body.layout-countdown .prayer-item.active { transform: translateY(-4px); }
+
+        /* ============================================
+           LAYOUT: Jam Analog
+           ============================================ */
+        .analog-clock { display: none; }
+        body.layout-analog .header { flex: 1; flex-direction: column; justify-content: center; text-align: center; background: none; padding-bottom: 0; }
+        body.layout-analog .masjid-info h1 { font-family: 'Cinzel', serif; color: var(--accent); }
+        body.layout-analog .clock-widget { text-align: center; display: flex; flex-direction: column; align-items: center; }
+        body.layout-analog .analog-clock { display: block; width: min(42vh, 30vw); height: auto; margin: 1.5vh 0; filter: drop-shadow(0 10px 30px rgba(0,0,0,.5)); }
+        body.layout-analog .clock-time { font-size: 2rem; color: #fff; }
+        body.layout-analog .content-grid { flex: none; display: block; padding: 0 3rem 5rem; }
+        body.layout-analog .slide-container { display: none; }
+        body.layout-analog .prayer-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 0.8rem; }
+        body.layout-analog .prayer-item { flex-direction: column; text-align: center; padding: 0.7rem 0.4rem; }
+        body.layout-analog .prayer-item.active { transform: translateY(-4px); }
+        .analog-clock .face { fill: rgba(0,0,0,.55); stroke: var(--accent); stroke-width: 4; }
+        .analog-clock .tick { stroke: rgba(255,255,255,.75); stroke-width: 2; }
+        .analog-clock .tick.major { stroke: var(--accent); stroke-width: 5; }
+        .analog-clock .h { stroke: #fff; stroke-width: 7; stroke-linecap: round; }
+        .analog-clock .m { stroke: #fff; stroke-width: 4.5; stroke-linecap: round; }
+        .analog-clock .s { stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
+        .analog-clock .pin { fill: var(--accent); }
+
+        /* ============================================
+           LAYOUT: TV Vertikal (portrait)
+           ============================================ */
+        body.layout-portrait .header { flex-direction: column; text-align: center; gap: 1rem; padding: 3vh 2rem 1vh; }
+        body.layout-portrait .masjid-info h1 { font-size: clamp(2rem, 5vw, 3.4rem); }
+        body.layout-portrait .clock-widget { text-align: center; }
+        body.layout-portrait .clock-time { font-size: clamp(3.5rem, 11vw, 7rem); }
+        body.layout-portrait .content-grid { display: flex; flex-direction: column; padding: 1vh 2rem 5rem; gap: 1.5vh; }
+        body.layout-portrait .prayer-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+        body.layout-portrait .prayer-item { flex-direction: column; text-align: center; padding: 1.2vh 0.5rem; }
+        body.layout-portrait .prayer-item.active { transform: scale(1.03); }
+        body.layout-portrait .prayer-name { font-size: clamp(1rem, 2.6vw, 1.6rem); }
+        body.layout-portrait .prayer-time { font-size: clamp(1.4rem, 4vw, 2.6rem); }
+        body.layout-portrait .slide-container { flex: 1; min-height: 0; }
+
+        /* ============================================
+           LAYOUT: Minimalis
+           ============================================ */
+        body.layout-minimal { background: var(--bg-dark); }
+        body.layout-minimal .bg-media { display: none; }
+        body.layout-minimal .header { flex: 1; flex-direction: column; justify-content: center; text-align: center; background: none; }
+        body.layout-minimal .masjid-info h1 { font-weight: 400; letter-spacing: 4px; text-transform: uppercase; font-size: 1.8rem; opacity: .85; }
+        body.layout-minimal .masjid-info p { display: none; }
+        body.layout-minimal .clock-widget { text-align: center; }
+        body.layout-minimal .clock-time { font-size: clamp(5rem, 15vw, 14rem); font-weight: 300; color: #fff; letter-spacing: -2px; }
+        body.layout-minimal .clock-date { font-size: 1.6rem; }
+        body.layout-minimal .clock-hijri { font-size: 1.2rem; }
+        body.layout-minimal .content-grid { flex: none; display: block; padding: 0 4rem 5rem; }
+        body.layout-minimal .slide-container { display: none; }
+        body.layout-minimal .prayer-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 0; border-top: 1px solid rgba(255,255,255,.15); padding-top: 1.5rem; }
+        body.layout-minimal .prayer-item { flex-direction: column; text-align: center; background: none; border: 0; backdrop-filter: none; }
+        body.layout-minimal .prayer-item.active { background: none; transform: none; box-shadow: none; }
+        body.layout-minimal .prayer-item.active .prayer-name { color: var(--accent); }
+        body.layout-minimal .prayer-item.active .prayer-time { color: var(--accent); }
+        body.layout-minimal .prayer-name { font-weight: 400; opacity: .7; font-size: 1.2rem; }
+        body.layout-minimal .prayer-time { color: #fff; font-weight: 300; font-size: 2.6rem; }
+        body.layout-minimal .running-text-container { background: transparent; border-top: 1px solid rgba(255,255,255,.1); }
+
+        /* ============================================
+           LAYOUT: Bingkai Ornamen
+           ============================================ */
+        body.layout-ornamen { padding: 18px; }
+        body.layout-ornamen::before {
+            content: ""; position: fixed; inset: 0; z-index: 60; pointer-events: none; padding: 18px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Cg fill='none' stroke='%23f5d27a' stroke-width='1.6' opacity='.9'%3E%3Crect x='10' y='10' width='16' height='16'/%3E%3Crect x='10' y='10' width='16' height='16' transform='rotate(45 18 18)'/%3E%3Ccircle cx='18' cy='18' r='3'/%3E%3C/g%3E%3C/svg%3E") repeat, var(--primary);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+        }
+        body.layout-ornamen .masjid-info h1 { font-family: 'Cinzel', serif; color: #f5d27a; letter-spacing: 2px; }
+        body.layout-ornamen .prayer-item { border-color: rgba(245,210,122,.35); }
+        body.layout-ornamen .prayer-item.active { border-color: #f5d27a; }
+        body.layout-ornamen .slide-container { border: 2px solid rgba(245,210,122,.35); }
+        body.layout-ornamen .running-text-container { left: 18px; right: 18px; bottom: 18px; width: auto; }
+        body.layout-ornamen .content-grid { padding-bottom: 4.5rem; }
+
+        /* Mode pratinjau di panel */
+        body.is-preview .display-controls-trigger, body.is-preview .display-controls-panel { display: none !important; }
+
+        /* ============================================
+           NEXT PRAYER CHIP (header)
+           ============================================ */
+        .next-chip {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            padding: 0.3rem 0.9rem;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.45);
+            border: 1px solid var(--glass-border);
+            font-size: 1.3rem;
+        }
+        .next-chip b { color: var(--accent); }
+        .next-chip .left { font-variant-numeric: tabular-nums; font-weight: 700; }
+        body.layout-big_clock .next-chip { font-size: clamp(1rem, 1.6vw, 1.4rem); }
+
+        /* ============================================
+           MENJELANG ADZAN BANNER
+           ============================================ */
+        .pre-banner {
+            position: fixed;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            z-index: 500;
+            background: var(--accent);
+            color: #111;
+            padding: 0.6rem 1.8rem;
+            border-radius: 0 0 18px 18px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            animation: pulse 2s ease-in-out infinite;
+            white-space: nowrap;
+        }
+        .pre-banner[hidden] { display: none; }
+        .pre-banner .left { font-variant-numeric: tabular-nums; margin-left: 0.4rem; }
+        @keyframes pulse { 50% { box-shadow: 0 6px 30px rgba(255,255,255,0.35); } }
+
+        /* ============================================
+           PHASE OVERLAY: iqamah / sholat / khutbah
+           ============================================ */
+        .phase-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            background: radial-gradient(ellipse at center, var(--primary) 0%, var(--bg-dark) 75%);
+            animation: fadeIn 0.6s ease;
+        }
+        .phase-overlay[hidden] { display: none; }
+        .phase-clock {
+            position: absolute;
+            top: 1.5rem; right: 2.5rem;
+            font-size: 2rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            opacity: 0.8;
+        }
+        .phase-masjid {
+            position: absolute;
+            top: 1.7rem; left: 2.5rem;
+            font-size: 1.3rem;
+            opacity: 0.7;
+        }
+        .phase-kicker { font-size: clamp(1.2rem, 2.4vw, 2.2rem); letter-spacing: 3px; text-transform: uppercase; opacity: 0.85; }
+        .phase-title { font-size: clamp(2.5rem, 7vw, 6.5rem); font-weight: 700; color: var(--accent); line-height: 1.1; margin: 0.4rem 0 1rem; }
+        .phase-label { font-size: clamp(1rem, 2vw, 1.8rem); opacity: 0.85; }
+        .phase-count {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(4rem, 14vw, 13rem);
+            font-weight: 800;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+        .phase-bar { width: min(70vw, 900px); height: 10px; border-radius: 99px; background: rgba(255,255,255,0.15); margin: 2rem auto 0; overflow: hidden; }
+        .phase-bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 1s linear; }
+        .phase-note { margin-top: 2rem; font-size: clamp(1.1rem, 2.2vw, 2rem); max-width: 1100px; line-height: 1.5; opacity: 0.9; }
+        .phase-note small { display: block; font-size: 0.75em; opacity: 0.75; margin-top: 0.5rem; }
+        .phase-overlay.is-dim { background: #000; }
+        .phase-overlay.is-dim .phase-title { color: rgba(255,255,255,0.55); }
+        .phase-overlay.is-dim > * { opacity: 0.55; }
+        .phase-overlay.is-dim .phase-count, .phase-overlay.is-dim .phase-bar, .phase-overlay.is-dim .phase-label { display: none; }
+
+        /* ============================================
+           SLIDE: Jadwal besar, Jumat, Kas
+           ============================================ */
+        .big-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; width: 100%; }
+        .big-cell { background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.4rem 1rem; text-align: center; }
+        .big-cell.active { background: var(--primary); border-color: var(--accent); }
+        .big-cell .n { font-size: 1.5rem; opacity: 0.85; }
+        .big-cell .t { font-size: 3.2rem; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+        .big-cell.active .t { color: #fff; }
+        .jumat-card { display: grid; gap: 1.2rem; width: min(100%, 900px); text-align: left; }
+        .jumat-row { display: flex; gap: 1.2rem; align-items: center; background: rgba(255,255,255,0.06); border-radius: 14px; padding: 1.2rem 1.6rem; }
+        .jumat-row i { font-size: 2.2rem; color: var(--accent); }
+        .jumat-row .k { font-size: 1.1rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; }
+        .jumat-row .v { font-size: 2.2rem; font-weight: 700; }
+        .kas-split { display: flex; gap: 1.5rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap; }
+        .kas-split div { background: rgba(0,0,0,0.25); border-radius: 12px; padding: 0.8rem 1.4rem; font-size: 1.3rem; }
+        .kas-split b { display: block; font-size: 1.9rem; }
+        .donasi-wrap { background: rgba(255,255,255,0.05); padding: 3rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); display: flex; gap: 3rem; align-items: center; max-width: 90%; }
+        .donasi-qr { text-align: center; background: #fff; padding: 1.5rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .donasi-qr img { height: min(400px, 50vh); width: auto; object-fit: contain; }
+        .donasi-qr p { color: #000; margin: 1rem 0 0; font-weight: bold; font-size: 1.5rem; }
+        .donasi-body { text-align: left; flex: 1; }
+        .donasi-body h2 { font-size: 3.5rem; color: var(--accent); margin: 0 0 1.5rem; line-height: 1.2; }
+        .donasi-body .teks { font-size: 2rem; line-height: 1.6; margin-bottom: 2rem; }
+        .donasi-body .rek { background: rgba(26, 107, 60, 0.8); padding: 2rem; border-radius: 16px; font-size: 1.8rem; border-left: 8px solid var(--accent); }
+
+        body.layout-modern .prayer-list { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); }
+        body.layout-big_clock .prayer-item#item-Imsak { display: none; }
+        body.hide-cursor, body.hide-cursor * { cursor: none !important; }
+
+        /* Layar pendek (TV 720p): rapatkan daftar jadwal agar tidak tertutup running text */
+        @media (min-width: 821px) and (max-height: 800px) {
+            .header { padding: 1rem 3rem 0.5rem; }
+            .content-grid { padding-bottom: 3.8rem; gap: 1.5rem; }
+            .prayer-list { gap: 0.5rem; }
+            .prayer-item { padding: 0.6rem 1.3rem; }
+            .prayer-name { font-size: 1.45rem; }
+            .prayer-time { font-size: 1.85rem; }
+            .clock-time { font-size: 4.2rem; }
+        }
+
+        /* ============================================
+           LAYAR KECIL (pratinjau di ponsel/tablet)
+           ============================================ */
+        @media (max-width: 820px) {
+            html { font-size: 16px; }
+            body { overflow-x: hidden; overflow-y: auto; height: auto; min-height: 100vh; }
+            .header, body.layout-simple .header, body.layout-big_clock .header { flex-direction: column; align-items: center; text-align: center; padding: 1rem; gap: 0.5rem; position: static; }
+            .clock-widget { text-align: center; }
+            .masjid-info h1 { font-size: 1.5rem; }
+            .clock-time { font-size: 2.6rem; }
+            body.layout-big_clock .clock-time { font-size: 3rem; padding: 0.2rem 1rem; letter-spacing: 2px; }
+            .content-grid, body[class*="layout-"] .content-grid { display: flex; flex-direction: column; padding: 0.5rem 1rem 5rem; height: auto; gap: 1rem; }
+            .prayer-list, body[class*="layout-"] .prayer-list {
+                position: static; transform: none; display: grid; grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem; width: 100%; padding: 0; background: none; border: 0; border-radius: 0; order: 1;
+            }
+            body.layout-big_clock .prayer-list { padding: 2rem 0.8rem 0.8rem; background: rgba(0,30,15,0.6); border: 2px solid var(--gold-dark); border-radius: 12px; }
+            .prayer-item, body[class*="layout-"] .prayer-item { flex-direction: column; padding: 0.6rem 0.3rem; text-align: center; min-width: 0; }
+            .prayer-item.active, body[class*="layout-"] .prayer-item.active { transform: none; }
+            .prayer-name, body[class*="layout-"] .prayer-name { font-size: 0.85rem; }
+            .prayer-time, body[class*="layout-"] .prayer-time { font-size: 1.15rem; }
+            .slide-container, body[class*="layout-"] .slide-container { position: relative; min-height: 60vh; order: 2; border-radius: 16px; }
+            body.layout-big_clock .slide-container { display: none; }
+            .slide, body.layout-full_slider .slide { padding: 1.2rem; }
+            .slide-title { font-size: 1.3rem; }
+            .slide-text { font-size: 1.1rem; }
+            .finance-box { padding: 1.5rem; }
+            .finance-amount { font-size: 2.2rem; }
+            .big-grid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+            .big-cell .t { font-size: 1.8rem; }
+            .jumat-row .v { font-size: 1.3rem; }
+            .donasi-wrap { flex-direction: column; padding: 1.2rem; gap: 1.2rem; max-width: 100%; }
+            .donasi-body h2 { font-size: 1.6rem; }
+            .donasi-body .teks, .donasi-body .rek { font-size: 1.1rem; padding: 1rem; }
+            .running-text { font-size: 1.1rem; }
+            .pre-banner { font-size: 1rem; padding: 0.5rem 1rem; }
+            .phase-clock { top: 1rem; right: 1rem; font-size: 1.2rem; }
+            .phase-masjid { display: none; }
+        }
+
+        /* Digit berlebar tetap (lihat setDigits) */
+        .dg { display: inline-block; text-align: center; }
+        .dn { display: inline-block; }
+
+        /* ============================================
+           REVISI UKURAN TEMPLATE — khusus layar TV/desktop (≥821px); ponsel tetap memakai aturan di atas
+           ============================================ */
+        @media (min-width: 821px) {
+            /* Jajaran jadwal di bawah/atas (Modern, Hitung Mundur, Jam Analog, Jadwal Atas) */
+            body.layout-modern .prayer-item, body.layout-countdown .prayer-item, body.layout-analog .prayer-item, body.layout-top_bar .prayer-item { padding: 0.8rem 0.4rem; gap: 0.15rem; }
+            body.layout-modern .prayer-name, body.layout-countdown .prayer-name, body.layout-analog .prayer-name, body.layout-top_bar .prayer-name { font-size: 1.45rem; margin: 0; }
+            body.layout-modern .prayer-time, body.layout-countdown .prayer-time, body.layout-analog .prayer-time, body.layout-top_bar .prayer-time { font-size: 3.3rem; line-height: 1.05; }
+            body.layout-modern .content-grid { gap: 1.2rem; }
+
+            /* Klasik & Bingkai Ornamen: jam kanan atas lebih besar */
+            body.layout-classic .clock-time, body.layout-ornamen .clock-time, body.layout-sidebar_right .clock-time, body.layout-masjid_info .clock-time { font-size: 7.4rem; letter-spacing: -1px; }
+            body.layout-classic .clock-date, body.layout-ornamen .clock-date { font-size: 1.5rem; }
+            body.layout-classic .header, body.layout-ornamen .header { padding-top: 1rem; padding-bottom: 0.6rem; }
+
+            /* Bingkai Ornamen (Jumat Berkah): jadwal kiri lebih besar */
+            body.layout-ornamen .content-grid { grid-template-columns: 27rem 1fr; }
+            body.layout-ornamen .prayer-list { gap: 0.6rem; }
+            body.layout-ornamen .prayer-item { padding: 0.75rem 1.4rem; }
+            body.layout-ornamen .prayer-name { font-size: 1.8rem; }
+            body.layout-ornamen .prayer-time { font-size: 2.9rem; }
+
+            /* Hitung Mundur (Malam Ramadan): jam sekarang besar, hitung mundur lebih kecil */
+            body.layout-countdown .bg-media, body.layout-analog .bg-media { filter: brightness(0.28); }
+            body.layout-countdown .header { gap: 0.4rem; }
+            body.layout-countdown .clock-time { order: 1; font-size: min(10vw, 17vh); color: #fff; opacity: 1; line-height: 1; font-weight: 700; }
+            body.layout-countdown .clock-date { order: 2; font-size: 1.5rem; }
+            body.layout-countdown .clock-hijri { order: 3; }
+            body.layout-countdown .next-chip { order: 4; margin: 1rem 0 0; flex-direction: row; align-items: baseline; gap: 0.8rem; background: rgba(0,0,0,0.45); border: 1px solid var(--glass-border); padding: 0.5rem 1.6rem; font-size: 1.6rem; }
+            body.layout-countdown .next-chip b { font-size: 2.6rem; line-height: 1.1; }
+            body.layout-countdown .next-chip .left { font-size: 3.4rem; color: var(--accent); }
+
+            /* Jam Digital LED: semua waktu lebih besar, jam utama terbesar */
+            body.layout-big_clock .header { padding-top: 1.5vh; }
+            body.layout-big_clock .masjid-info h1 { font-size: min(3.6vw, 6vh); }
+            body.layout-big_clock .clock-time { font-size: min(13vw, 20vh); padding: 0.12em 0.35em; letter-spacing: 0.04em; }
+            body.layout-big_clock .clock-date { font-size: min(1.9vw, 3.2vh); }
+            body.layout-big_clock .clock-hijri { font-size: min(1.4vw, 2.4vh); }
+            body.layout-big_clock .next-chip { font-size: min(1.8vw, 3vh); }
+            body.layout-big_clock .content-grid { padding: 3.5vh 3vw 8.5vh; }
+            body.layout-big_clock .prayer-list { width: 94%; max-width: none; gap: 1.4vh 2vw; padding: 4vh 2.5vw 2.5vh; }
+            body.layout-big_clock .prayer-item { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1vh 1.6vw; }
+            body.layout-big_clock .prayer-name { font-size: min(2.1vw, 3.5vh); white-space: nowrap; }
+            body.layout-big_clock .prayer-time { font-size: min(4.4vw, 6.8vh); white-space: nowrap; }
+            body.layout-big_clock .prayer-list::before { font-size: min(1.5vw, 2.6vh); }
+
+            /* Jam Analog: jam digital & jadwal lebih besar */
+            body.layout-analog .analog-clock { width: min(38vh, 28vw); margin: 1vh 0 0.5vh; }
+            body.layout-analog .clock-time { font-size: 3.2rem; line-height: 1.1; }
+            body.layout-analog .clock-date { font-size: 1.35rem; }
+            body.layout-analog .header { padding-top: 1rem; }
+
+            /* Minimalis: jam utama & jadwal lebih besar */
+            body.layout-minimal .clock-time { font-size: min(23vw, 36vh); line-height: 1; letter-spacing: -0.02em; }
+            body.layout-minimal .clock-date { font-size: 1.9rem; margin-top: 0.4rem; }
+            body.layout-minimal .clock-hijri { font-size: 1.35rem; }
+            body.layout-minimal .next-chip { font-size: 1.5rem; }
+            body.layout-minimal .content-grid { padding: 0 3rem 5rem; }
+            body.layout-minimal .prayer-list { padding-top: 1.2rem; }
+            body.layout-minimal .prayer-name { font-size: 1.6rem; }
+            body.layout-minimal .prayer-time { font-size: 4.6rem; line-height: 1.05; }
+        }
+
+        @media (min-width: 821px) and (max-height: 800px) {
+            body.layout-ornamen .prayer-list { gap: 0.45rem; }
+            body.layout-ornamen .prayer-item { padding: 0.45rem 1.2rem; }
+            body.layout-ornamen .prayer-name { font-size: 1.5rem; }
+            body.layout-ornamen .prayer-time { font-size: 2.3rem; }
+            body.layout-classic .clock-time, body.layout-ornamen .clock-time { font-size: 6.4rem; }
+        }
+        /* ============================================
+           FASE ADZAN/IQAMAH/SHOLAT/KHUTBAH — ukuran mengikuti viewport
+           ============================================ */
+        .phase-overlay { gap: min(1vh, 0.8rem); padding: 3vh 4vw; justify-content: center; }
+        .phase-masjid { position: static; font-size: clamp(1rem, min(1.9vw, 3.2vh), 2.4rem); opacity: 0.8; letter-spacing: 0.04em; }
+        .phase-clock { position: static; font-size: clamp(2.8rem, min(8vw, 13vh), 11rem); font-weight: 700; line-height: 1; opacity: 1;
+                       font-variant-numeric: tabular-nums; margin-bottom: 1.5vh; color: #fff; text-shadow: 0 4px 20px rgba(0,0,0,0.35); }
+        .phase-kicker { font-size: clamp(1rem, min(2.3vw, 3.8vh), 2.8rem); }
+        .phase-title { font-size: clamp(2rem, min(6vw, 9vh), 8rem); margin: 0.15em 0 0.25em; }
+        .phase-label { font-size: clamp(1.1rem, min(2.4vw, 4vh), 3rem); }
+        .phase-count { font-size: clamp(3.5rem, min(15vw, 23vh), 20rem); }
+        .phase-bar { height: max(8px, 1vh); width: min(70vw, 1100px); margin-top: 2vh; }
+        .phase-note { font-size: clamp(1rem, min(2vw, 3.3vh), 2.4rem); margin-top: 2.2vh; }
+        /* Sholat berlangsung: layar redup, tetapi jam & lama berlangsung tetap terbaca */
+        .phase-overlay.is-dim .phase-clock { opacity: 0.85; color: #fff; }
+        .phase-overlay.is-dim .phase-label { display: block; opacity: 0.6; }
+        .phase-overlay.is-dim .phase-count { display: block; opacity: 0.6; font-size: clamp(2.6rem, min(9vw, 14vh), 12rem); }
+        .phase-overlay.is-khutbah .phase-count { font-size: clamp(2.6rem, min(9vw, 14vh), 12rem); opacity: 0.85; }
+
+        /* Menjelang adzan: banner besar; isi layar digeser turun agar tidak tertimpa */
+        .pre-banner { display: flex; align-items: center; gap: 0.6em; padding: 0.35em 1.2em 0.45em; border-radius: 0 0 0.7em 0.7em;
+                      font-size: clamp(1rem, min(2.1vw, 3.6vh), 2.6rem); max-width: 96vw; }
+        .pre-banner .left { font-family: 'Orbitron', monospace; font-size: 1.6em; font-weight: 800; line-height: 1; margin-left: 0.2em; }
+        body.has-pre { padding-top: clamp(3.2rem, min(5.2vw, 8.6vh), 7rem); }
+        body.has-pre .header { padding-top: 0.4rem; }
+        body.has-pre.layout-ornamen .prayer-item { padding-top: 0.55rem; padding-bottom: 0.55rem; }
+        body.has-pre.layout-ornamen .prayer-list { gap: 0.45rem; }
+        body.has-pre.layout-full_slider .header { top: clamp(3.2rem, min(5.2vw, 8.6vh), 7rem); }
+
     </style>
 </head>
-<body class="theme-{{ display_settings.tema|default:'default' }} layout-{{ display_settings.layout|default:'classic' }}">
+<body class="theme-{{ display_settings.tema|default:'default' }} layout-{{ display_settings.layout|default:'classic' }}{% if preview %} is-preview{% endif %}" style="{{ theme_style }}">
     {% if display_settings.video_url and display_settings.video_url|lower|slice:"-4:" == ".mp4" or display_settings.video_url and display_settings.video_url|lower|slice:"-5:" == ".webm" %}
         <video src="{{ display_settings.video_url }}" class="bg-media" autoplay muted loop playsinline></video>
     {% else %}
@@ -610,20 +966,35 @@
 
     <div class="header">
         <div class="masjid-info">
-            <h1>{{ profil.nama|default:"Masjid Al-Ikhlas" }}</h1>
-            <p>{{ profil.alamat|default:"Jl. Kebnikan No. 1" }}</p>
+            <h1>{{ profil.nama|default:SITE_NAME }}</h1>
+            {% if profil.alamat and profil.alamat != "-" %}<p>{{ profil.alamat }}</p>{% endif %}
         </div>
         <div class="clock-widget">
-            <div class="clock-time" id="clock">00:00:00</div>
-            <div class="clock-date" id="date">Senin, 1 Januari 2024</div>
+            <svg class="analog-clock" viewBox="0 0 200 200" aria-hidden="true">
+                <circle class="face" cx="100" cy="100" r="94"/>
+                {% for i in "x"|rjust:60|make_list %}<line class="tick{% if forloop.counter0|divisibleby:5 %} major{% endif %}" x1="100" y1="{% if forloop.counter0|divisibleby:5 %}14{% else %}10{% endif %}" x2="100" y2="{% if forloop.counter0|divisibleby:5 %}26{% else %}16{% endif %}" transform="rotate({% widthratio forloop.counter0 1 6 %} 100 100)"/>{% endfor %}
+                <line class="h" id="ac-h" x1="100" y1="100" x2="100" y2="52"/>
+                <line class="m" id="ac-m" x1="100" y1="100" x2="100" y2="30"/>
+                <line class="s" id="ac-s" x1="100" y1="112" x2="100" y2="22"/>
+                <circle class="pin" cx="100" cy="100" r="5"/>
+            </svg>
+            <div class="clock-time" id="clock">--:--:--</div>
+            <div class="clock-date" id="date">{{ prayer_times.subuh|date:"l, j F Y" }}</div>
             <div class="clock-hijri" id="hijri-date">☪ {% hijri_today_full %}</div>
+            <div class="next-chip" id="next-chip">Menuju <b data-name>…</b> <span class="left" data-left>--:--:--</span></div>
         </div>
     </div>
 
     <div class="content-grid">
         <!-- Sidebar Jadwal Sholat -->
         <div class="prayer-list">
-             <div class="prayer-item" id="item-Subuh">
+            {% if display_settings.tampilkan_imsak %}
+            <div class="prayer-item" id="item-Imsak">
+                <span class="prayer-name">Imsak</span>
+                <span class="prayer-time">{{ prayer_times.imsak|date:"H:i" }}</span>
+            </div>
+            {% endif %}
+            <div class="prayer-item" id="item-Subuh">
                 <span class="prayer-name">Subuh</span>
                 <span class="prayer-time">{{ prayer_times.fajr|date:"H:i" }}</span>
             </div>
@@ -632,7 +1003,7 @@
                 <span class="prayer-time">{{ prayer_times.sunrise|date:"H:i" }}</span>
             </div>
             <div class="prayer-item" id="item-Dzuhur">
-                <span class="prayer-name">Dzuhur</span>
+                <span class="prayer-name">{% if is_jumat %}Jumat{% else %}Dzuhur{% endif %}</span>
                 <span class="prayer-time">{{ prayer_times.dhuhr|date:"H:i" }}</span>
             </div>
             <div class="prayer-item" id="item-Ashar">
@@ -670,12 +1041,42 @@
                         {% endif %}
                     </div>
 
+                {% elif slide.tipe == 'sholat' %}
+                    <div class="slide-content-center">
+                        <div class="big-grid">
+                            <div class="big-cell" data-prayer="Subuh"><div class="n">Subuh</div><div class="t">{{ prayer_times.subuh|date:"H:i" }}</div></div>
+                            <div class="big-cell" data-prayer="Syuruq"><div class="n">Syuruq</div><div class="t">{{ prayer_times.terbit|date:"H:i" }}</div></div>
+                            <div class="big-cell" data-prayer="Dzuhur"><div class="n">{% if is_jumat %}Jumat{% else %}Dzuhur{% endif %}</div><div class="t">{{ prayer_times.dzuhur|date:"H:i" }}</div></div>
+                            <div class="big-cell" data-prayer="Ashar"><div class="n">Ashar</div><div class="t">{{ prayer_times.ashar|date:"H:i" }}</div></div>
+                            <div class="big-cell" data-prayer="Maghrib"><div class="n">Maghrib</div><div class="t">{{ prayer_times.maghrib|date:"H:i" }}</div></div>
+                            <div class="big-cell" data-prayer="Isya"><div class="n">Isya</div><div class="t">{{ prayer_times.isya|date:"H:i" }}</div></div>
+                        </div>
+                        <p style="opacity:.7;margin-top:1.2rem">Imsak {{ prayer_times.imsak|date:"H:i" }} · {% if slide.konten_teks %}{{ slide.konten_teks }}{% else %}Sumber: Kemenag RI{% endif %}</p>
+                    </div>
+
+                {% elif slide.tipe == 'jumat' %}
+                    <div class="slide-content-center">
+                        {% if jumat %}
+                        <div class="jumat-card">
+                            <div class="jumat-row"><i class="bi bi-calendar-week"></i><div><div class="k">Jumat</div><div class="v">{{ jumat.tanggal|date:"l, j F Y" }}</div></div></div>
+                            <div class="jumat-row"><i class="bi bi-mic"></i><div><div class="k">Khatib</div><div class="v">{{ jumat.khatib }}</div></div></div>
+                            <div class="jumat-row"><i class="bi bi-person"></i><div><div class="k">Imam</div><div class="v">{{ jumat.imam }}</div></div></div>
+                            {% if jumat.tema %}<div class="jumat-row"><i class="bi bi-chat-quote"></i><div><div class="k">Tema khutbah</div><div class="v">{{ jumat.tema }}</div></div></div>{% endif %}
+                        </div>
+                        {% else %}
+                        <p class="slide-text">Jadwal petugas Jumat belum diisi.</p>
+                        {% endif %}
+                    </div>
+
                 {% elif slide.tipe == 'kas' %}
                     <div class="slide-content-center">
                          <div class="finance-box">
                              <h3 style="color:rgba(255,255,255,0.7)">SALDO KAS SAAT INI</h3>
                              <div class="finance-amount">Rp {{ saldo_akhir|rupiah }}</div>
-                             <p style="color:rgba(255,255,255,0.7)">Laporan Keuangan Masjid</p>
+                             <div class="kas-split">
+                                 <div>Pemasukan {{ prayer_times.subuh|date:"F" }}<b>Rp {{ kas_bulan_masuk|rupiah }}</b></div>
+                                 <div>Pengeluaran {{ prayer_times.subuh|date:"F" }}<b>Rp {{ kas_bulan_keluar|rupiah }}</b></div>
+                             </div>
                          </div>
                     </div>
 
@@ -689,7 +1090,7 @@
                             </div>
                             <div>
                                 <h3 style="margin:0;color:var(--accent)">{{ keg.judul }}</h3>
-                                <p style="margin:0;opacity:0.75"><i class="bi bi-clock"></i> {{ keg.waktu|time:"H:i" }} - {{ keg.tempat }}</p>
+                                <p style="margin:0;opacity:0.75"><i class="bi bi-clock"></i> {{ keg.waktu_mulai|time:"H:i" }}{% if keg.waktu_selesai %}–{{ keg.waktu_selesai|time:"H:i" }}{% endif %} · {{ keg.tempat }}{% if keg.narasumber %} · {{ keg.narasumber }}{% endif %}</p>
                             </div>
                         </div>
                         {% empty %}
@@ -702,13 +1103,13 @@
                         {% for item in berita_list %}
                         <div class="list-item">
                             {% if item.gambar %}
-                            <img src="{{ item.gambar.url }}" style="width:80px;height:80px;object-fit:cover;border-radius:8px">
+                            <img src="{{ item.gambar.url }}" alt="" style="width:80px;height:80px;object-fit:cover;border-radius:8px">
                             {% else %}
                             <div style="width:80px;height:80px;background:#333;border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="bi bi-newspaper" style="font-size:1.5rem"></i></div>
                             {% endif %}
                             <div>
                                 <h3 style="margin:0;color:#fff">{{ item.judul }}</h3>
-                                <span style="background:var(--primary);padding:2px 8px;border-radius:4px;font-size:0.8rem;margin-top:4px;display:inline-block">{{ item.kategori.nama }}</span>
+                                {% if item.kategori %}<span style="background:var(--primary);padding:2px 8px;border-radius:4px;font-size:0.8rem;margin-top:4px;display:inline-block">{{ item.kategori.nama }}</span>{% endif %}
                                 <p style="margin:0;opacity:0.75;font-size:0.85rem;margin-top:4px">{{ item.created_at|date:"d M Y" }}</p>
                             </div>
                         </div>
@@ -719,23 +1120,18 @@
 
                 {% elif slide.tipe == 'donasi' %}
                     <div class="slide-content-center">
-                        <div style="background:rgba(255,255,255,0.05); padding:3rem; border-radius:20px; border:1px solid rgba(255,255,255,0.1); display:flex; gap:3rem; align-items:center; max-width:90%;">
+                        <div class="donasi-wrap">
                              {% if site_setting.qris_image %}
-                             <div style="text-align:center; background:#fff; padding:1.5rem; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
-                                 <img src="{{ site_setting.qris_image.url }}" style="height:400px; width:auto; object-fit:contain;">
-                                 <p style="color:#000; margin:1rem 0 0; font-weight:bold; font-size:1.5rem;">SCAN QRIS</p>
+                             <div class="donasi-qr">
+                                 <img src="{{ site_setting.qris_image.url }}" alt="QRIS">
+                                 <p>SCAN QRIS</p>
                              </div>
                              {% endif %}
-                             
-                             <div style="text-align:left; flex:1;">
-                                 <h2 style="font-size:3.5rem; color:var(--accent); margin:0 0 1.5rem; line-height:1.2;">{{ slide.judul|default:"Salurkan Infaq & Sedekah" }}</h2>
-                                 <div style="font-size:2rem; line-height:1.6; margin-bottom:2rem;">
-                                     {{ site_setting.donasi_teks|default:"Mari makmurkan masjid dengan harta terbaik kita." }}
-                                 </div>
+                             <div class="donasi-body">
+                                 <h2>{{ slide.judul|default:"Salurkan Infaq & Sedekah" }}</h2>
+                                 <div class="teks">{{ site_setting.donasi_teks|default:"Mari makmurkan masjid dengan harta terbaik kita." }}</div>
                                  {% if site_setting.rekening_info %}
-                                 <div style="background:rgba(26, 107, 60, 0.8); padding:2rem; border-radius:16px; font-size:1.8rem; border-left:8px solid var(--accent);">
-                                     {{ site_setting.rekening_info|linebreaksbr }}
-                                 </div>
+                                 <div class="rek">{{ site_setting.rekening_info|linebreaksbr }}</div>
                                  {% endif %}
                              </div>
                         </div>
@@ -753,7 +1149,7 @@
                 <div class="slide-content-center">
                     <div>
                         <h2>Menuju Waktu <span id="next-prayer-name">...</span></h2>
-                        <div id="countdown" style="font-size:6rem;font-weight:bold;color:var(--accent)">--:--:--</div>
+                        <div id="countdown" style="font-size:clamp(3rem, 12vw, 8.5rem);font-weight:bold;color:var(--accent);font-variant-numeric:tabular-nums">--:--:--</div>
                     </div>
                 </div>
             </div>
@@ -767,122 +1163,260 @@
         </div>
     </div>
 
+    <!-- Menjelang adzan -->
+    <div class="pre-banner" id="pre-banner" hidden><i class="bi bi-bell-fill"></i> Menjelang adzan <span data-name></span> <span class="left" data-left></span></div>
+
+    <!-- Adzan → iqamah → sholat berjamaah / khutbah Jumat -->
+    <div class="phase-overlay" id="phase" hidden aria-live="polite">
+        <div class="phase-masjid">{{ profil.nama|default:SITE_NAME }}</div>
+        <div class="phase-clock" data-clock></div>
+        <div class="phase-kicker" data-kicker></div>
+        <div class="phase-title" data-title></div>
+        <div class="phase-label" data-label></div>
+        <div class="phase-count" data-left></div>
+        <div class="phase-bar"><span data-bar></span></div>
+        <div class="phase-note" data-note></div>
+    </div>
+
+    {{ monitor_config|json_script:"monitor-config" }}
     <script>
-        // Clock & Prayer Time Logic
-        const prayerTimes = {
-            'Subuh': new Date("{{ prayer_times.fajr.isoformat }}"),
-            'Syuruq': new Date("{{ prayer_times.sunrise.isoformat }}"),
-            'Dzuhur': new Date("{{ prayer_times.dhuhr.isoformat }}"),
-            'Ashar': new Date("{{ prayer_times.asr.isoformat }}"),
-            'Maghrib': new Date("{{ prayer_times.maghrib.isoformat }}"),
-            'Isya': new Date("{{ prayer_times.isha.isoformat }}")
+        // ---- Waktu: jam server (perangkat TV sering salah jam) & zona waktu masjid ----
+        var TZ = "{{ masjid_tz|escapejs }}";
+        var serverOffset = {{ server_now_ms }} - Date.now();
+        function nowMs() { return Date.now() + serverOffset; }
+        var CFG = JSON.parse(document.getElementById('monitor-config').textContent);
+        var PREVIEW = {{ preview|yesno:"true,false" }};       // dipakai di iframe editor panel
+        var PREVIEW_FASE = "{{ preview_fase }}";             // simulasi: menjelang | iqamah | sholat | khutbah
+        var IS_JUMAT = {{ is_jumat|yesno:"true,false" }};
+        var KHATIB = "{% if jumat and jumat.tanggal == prayer_times.subuh.date %}Khatib: {{ jumat.khatib|escapejs }} · Imam: {{ jumat.imam|escapejs }}{% endif %}";
+
+        var prayerTimes = {
+            {% if display_settings.tampilkan_imsak %}'Imsak': Date.parse("{{ prayer_times.imsak.isoformat }}"),{% endif %}
+            'Subuh': Date.parse("{{ prayer_times.subuh.isoformat }}"),
+            'Syuruq': Date.parse("{{ prayer_times.terbit.isoformat }}"),
+            'Dzuhur': Date.parse("{{ prayer_times.dzuhur.isoformat }}"),
+            'Ashar': Date.parse("{{ prayer_times.ashar.isoformat }}"),
+            'Maghrib': Date.parse("{{ prayer_times.maghrib.isoformat }}"),
+            'Isya': Date.parse("{{ prayer_times.isya.isoformat }}")
         };
+        var SUBUH_BESOK = Date.parse("{{ besok.subuh.isoformat }}");
+        var WAJIB = ['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
+        function label(name) { return name === 'Dzuhur' && IS_JUMAT ? 'Jumat' : name; }
 
-        // Notification Logic
-        const playedNotifications = {};
-        const notifAudio = new Audio();
+        var fmtParts = new Intl.DateTimeFormat('id-ID', {timeZone: TZ, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'});
+        var fmtDate = new Intl.DateTimeFormat('id-ID', {timeZone: TZ, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+        function clockText(ms) {
+            var p = {};
+            fmtParts.formatToParts(new Date(ms)).forEach(function(x) { p[x.type] = x.value; });
+            return p.hour + ':' + p.minute + ':' + p.second;
+        }
+        function pad(n) { return String(n).padStart(2, '0'); }
 
+        // Angka berlebar tetap: tiap digit di kotak selebar digit terlebar font tersebut (mis. Orbitron
+        // tidak punya angka tabular), agar jam/hitung mundur tidak bergeser setiap detik.
+        var digitCache = {};
+        function digitWidth(el) {
+            var cs = getComputedStyle(el), key = cs.fontFamily + '|' + cs.fontWeight + '|' + cs.fontStyle;
+            if (digitCache[key]) return digitCache[key];
+            var probe = document.createElement('span');
+            probe.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;font-size:100px;letter-spacing:0';
+            el.appendChild(probe);
+            var w = 0;
+            for (var d = 0; d < 10; d++) { probe.textContent = String(d); w = Math.max(w, probe.getBoundingClientRect().width); }
+            probe.remove();
+            return (digitCache[key] = (w / 100).toFixed(3));
+        }
+        function setDigits(el, text) {
+            if (!el || el._digits === text) return;
+            el._digits = text;
+            var w = digitWidth(el), html = '';
+            for (var i = 0; i < text.length; i++) {
+                var ch = text[i];
+                html += /[0-9]/.test(ch) ? '<span class="dg" style="width:' + w + 'em">' + ch + '</span>' : '<span class="dn">' + ch + '</span>';
+            }
+            el.innerHTML = html;
+        }
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
+            digitCache = {};
+            document.querySelectorAll('.dg').forEach(function (e) { var p = e.parentNode; if (p) p._digits = null; });
+        });
+        function duration(ms, withHours) {
+            var s = Math.max(0, Math.ceil(ms / 1000));
+            var h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+            return (withHours || h ? pad(h) + ':' : '') + pad(m) + ':' + pad(s % 60);
+        }
+
+        // ---- Suara ----
+        var notifAudio = new Audio();
         {% if display_settings.custom_notification %}
         notifAudio.src = "{{ display_settings.custom_notification.url }}";
         {% elif display_settings.sholat_notification %}
         notifAudio.src = "{% static 'audio/' %}{{ display_settings.sholat_notification }}";
         {% endif %}
-
         function playNotification() {
-            if (notifAudio.src) {
-                notifAudio.play().catch(function(e) {
-                    console.log("Audio play blocked by browser:", e);
-                });
-            }
+            if (PREVIEW) return;
+            if (notifAudio.src) notifAudio.play().catch(function(e) { console.log('Audio diblokir peramban:', e); });
         }
+        // Peramban memblokir suara sampai ada interaksi: sekali klik/sentuh di layar membukanya.
+        document.addEventListener('click', function unlock() {
+            if (notifAudio.src) { notifAudio.muted = true; notifAudio.play().then(function() { notifAudio.pause(); notifAudio.currentTime = 0; notifAudio.muted = false; }).catch(function() { notifAudio.muted = false; }); }
+            document.removeEventListener('click', unlock);
+        });
 
-        function updateClock() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('id-ID', { hour12: false });
-            const dateString = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-
-            document.getElementById('clock').innerText = timeString;
-            document.getElementById('date').innerText = dateString;
-
-            updateNextPrayer(now);
+        // ---- Fase: menjelang adzan → iqamah → sholat berjamaah (Jumat: khutbah) ----
+        // Pratinjau editor: memutar alur sungguhan sejak halaman dibuka, memakai durasi dari pengaturan
+        // (menjelang → adzan/iqamah → sholat → normal; khutbah untuk Jumat).
+        var previewStart = nowMs(), previewName;
+        function previewPhase(now) {
+            if (!previewName) { var nx = nextPrayer(now); previewName = WAJIB.indexOf(nx.name) >= 0 ? nx.name : 'Dzuhur'; }
+            var name = previewName, t0 = previewStart, min = 60000;
+            if (PREVIEW_FASE === 'menjelang') { var pm = (CFG.peringatan || 10) * min; return now < t0 + pm ? {type: 'menjelang', name: name, end: t0 + pm} : null; }
+            if (PREVIEW_FASE === 'khutbah') { var km = (CFG.jumat || 40) * min; return now < t0 + km ? {type: 'khutbah', name: 'Dzuhur', start: t0, end: t0 + km} : null; }
+            var iq = PREVIEW_FASE === 'iqamah' ? (CFG.iqamah[name] || 10) * min : 0, sh = (CFG.sholat || 10) * min;
+            if (now < t0 + iq) return {type: 'iqamah', name: name, start: t0, end: t0 + iq};
+            if (now < t0 + iq + sh) return {type: 'sholat', name: name, start: t0 + iq, end: t0 + iq + sh};
+            return null;
         }
-
-        function updateNextPrayer(now) {
-            let nextPrayer = null;
-            let nextTime = null;
-            let minDiff = Infinity;
-
-            for (const [name, time] of Object.entries(prayerTimes)) {
-                const diff = new Date(time) - now;
-                if (diff > 0 && diff < minDiff) {
-                    minDiff = diff;
-                    nextPrayer = name;
-                    nextTime = new Date(time);
+        function currentPhase(now) {
+            if (PREVIEW_FASE === 'normal') return null;
+            if (PREVIEW_FASE) return previewPhase(now);
+            for (var i = 0; i < WAJIB.length; i++) {
+                var name = WAJIB[i], t = prayerTimes[name];
+                if (name === 'Dzuhur' && CFG.jumat > 0) {
+                    if (now >= t && now < t + CFG.jumat * 60000) return {type: 'khutbah', name: name, start: t, end: t + CFG.jumat * 60000};
+                } else {
+                    var iq = (CFG.iqamah[name] || 0) * 60000;
+                    if (now >= t && now < t + iq) return {type: 'iqamah', name: name, start: t, end: t + iq};
+                    if (CFG.sholat > 0 && now >= t + iq && now < t + iq + CFG.sholat * 60000) return {type: 'sholat', name: name, start: t + iq, end: t + iq + CFG.sholat * 60000};
                 }
+                if (CFG.peringatan > 0 && now >= t - CFG.peringatan * 60000 && now < t) return {type: 'menjelang', name: name, end: t};
             }
+            return null;
+        }
 
-            if (!nextPrayer && prayerTimes['Subuh']) {
-                nextPrayer = 'Subuh';
-                const todaySubuh = new Date(prayerTimes['Subuh']);
-                nextTime = new Date(todaySubuh.getTime() + 24 * 60 * 60 * 1000);
+        var phaseEl = document.getElementById('phase');
+        var bannerEl = document.getElementById('pre-banner');
+        function q(root, key) { return root.querySelector('[data-' + key + ']'); }
+        function renderPhase(ph, now) {
+            var overlay = ph && ph.type !== 'menjelang';
+            bannerEl.hidden = !(ph && ph.type === 'menjelang');
+            document.body.classList.toggle('has-pre', !bannerEl.hidden);
+            phaseEl.hidden = !overlay;
+            if (ph && ph.type === 'menjelang') {
+                q(bannerEl, 'name').textContent = label(ph.name);
+                setDigits(q(bannerEl, 'left'), duration(ph.end - now));
             }
-
-            if (nextPrayer && nextTime) {
-                document.querySelectorAll('.prayer-item').forEach(function(el) { el.classList.remove('active'); });
-                const activeEl = document.getElementById('item-' + nextPrayer);
-                if (activeEl) activeEl.classList.add('active');
-
-                const countdownEl = document.getElementById('countdown');
-                const nextNameEl = document.getElementById('next-prayer-name');
-
-                if (countdownEl && nextNameEl) {
-                    nextNameEl.innerText = nextPrayer;
-                    const diffMs = nextTime - now;
-
-                    if (diffMs > 0) {
-                        const hours = Math.floor(diffMs / (1000 * 60 * 60));
-                        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-                        const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-                        countdownEl.innerText =
-                            String(hours).padStart(2, '0') + ':' +
-                            String(minutes).padStart(2, '0') + ':' +
-                            String(seconds).padStart(2, '0');
-
-                        if (diffMs < 1000 && !playedNotifications[nextPrayer]) {
-                            playNotification();
-                            playedNotifications[nextPrayer] = true;
-                        }
-                    } else {
-                        countdownEl.innerText = "00:00:00";
-                        if (!playedNotifications[nextPrayer] && diffMs > -5000) {
-                            playNotification();
-                            playedNotifications[nextPrayer] = true;
-                        }
-                    }
-                }
+            if (!overlay) return;
+            phaseEl.classList.toggle('is-dim', ph.type === 'sholat');
+            phaseEl.classList.toggle('is-khutbah', ph.type === 'khutbah');
+            setDigits(q(phaseEl, 'clock'), clockText(now));
+            var progress = ph.end ? Math.min(100, (now - ph.start) / (ph.end - ph.start) * 100) : 0;
+            q(phaseEl, 'bar').style.width = progress + '%';
+            q(phaseEl, 'bar').parentNode.style.display = ph.type === 'iqamah' ? '' : 'none';
+            if (ph.type === 'iqamah') {
+                q(phaseEl, 'kicker').textContent = 'Telah masuk waktu';
+                q(phaseEl, 'title').textContent = 'Sholat ' + label(ph.name);
+                q(phaseEl, 'label').textContent = 'Iqamah dalam';
+                setDigits(q(phaseEl, 'left'), duration(ph.end - now));
+                q(phaseEl, 'note').innerHTML = 'Mari sempurnakan wudhu dan isi shaf terdepan.<small>Jawablah adzan dan perbanyak doa di antara adzan dan iqamah.</small>';
+            } else if (ph.type === 'sholat') {
+                q(phaseEl, 'kicker').textContent = 'Sholat ' + label(ph.name) + ' berjamaah';
+                q(phaseEl, 'title').textContent = 'Sedang berlangsung';
+                q(phaseEl, 'label').textContent = 'Telah berlangsung';
+                setDigits(q(phaseEl, 'left'), duration(now - ph.start));
+                q(phaseEl, 'note').innerHTML = 'Luruskan dan rapatkan shaf.<small>Mohon nonaktifkan nada dering ponsel.</small>';
+            } else {
+                q(phaseEl, 'kicker').textContent = 'Sholat Jumat';
+                q(phaseEl, 'title').textContent = 'Khutbah sedang berlangsung';
+                q(phaseEl, 'label').textContent = 'Sejak adzan';
+                setDigits(q(phaseEl, 'left'), duration(now - ph.start));
+                var note = 'Diam dan dengarkan khutbah. Mohon nonaktifkan nada dering ponsel.';
+                q(phaseEl, 'note').innerHTML = '';
+                q(phaseEl, 'note').appendChild(document.createTextNode(note));
+                if (KHATIB) { var sm = document.createElement('small'); sm.textContent = KHATIB; q(phaseEl, 'note').appendChild(sm); }
             }
         }
 
-        setInterval(updateClock, 1000);
-        updateClock();
+        // ---- Sholat berikutnya ----
+        function nextPrayer(now) {
+            for (var name in prayerTimes) {
+                if (prayerTimes[name] > now) return {name: name, time: prayerTimes[name]};
+            }
+            return {name: 'Subuh', time: SUBUH_BESOK, besok: true};
+        }
 
-        // Muat ulang agar jadwal hari berikutnya, slide, dan saldo selalu terbaru.
-        // Hanya bila server bisa dijangkau dan tidak dekat waktu sholat (notifikasi tetap berbunyi).
+        var lastPhaseKey, playedAdzan = {};
+        var chip = document.getElementById('next-chip');
+        function tick() {
+            var now = nowMs();
+            var ct = clockText(now);
+            setDigits(document.getElementById('clock'), ct);
+            var hms = ct.split(':').map(Number);
+            document.getElementById('ac-h').setAttribute('transform', 'rotate(' + ((hms[0] % 12) * 30 + hms[1] * 0.5) + ' 100 100)');
+            document.getElementById('ac-m').setAttribute('transform', 'rotate(' + (hms[1] * 6 + hms[2] * 0.1) + ' 100 100)');
+            document.getElementById('ac-s').setAttribute('transform', 'rotate(' + hms[2] * 6 + ' 100 100)');
+            document.getElementById('date').textContent = fmtDate.format(new Date(now));
+
+            var nx = nextPrayer(now);
+            q(chip, 'name').textContent = label(nx.name) + (nx.besok ? ' (besok)' : '');
+            setDigits(q(chip, 'left'), '-' + duration(nx.time - now, true));
+            document.querySelectorAll('.prayer-item').forEach(function(el) { el.classList.toggle('active', !nx.besok && el.id === 'item-' + nx.name); });
+            document.querySelectorAll('.big-cell').forEach(function(el) { el.classList.toggle('active', !nx.besok && el.dataset.prayer === nx.name); });
+            if (nx.besok) { var s = document.getElementById('item-Subuh'); if (s) s.classList.add('active'); }
+            var cd = document.getElementById('countdown');
+            if (cd) { document.getElementById('next-prayer-name').textContent = label(nx.name); setDigits(cd, duration(nx.time - now, true)); }
+
+            // Adzan: bunyikan saat waktu tiba
+            WAJIB.forEach(function(name) {
+                var d = now - prayerTimes[name];
+                if (d >= 0 && d < 5000 && !playedAdzan[name]) { playedAdzan[name] = true; playNotification(); }
+            });
+
+            var ph = currentPhase(now);
+            var key = ph ? ph.type + ph.name : '';
+            // Iqamah: bunyikan saat hitung mundur iqamah habis
+            if (lastPhaseKey !== undefined && key !== lastPhaseKey && lastPhaseKey.indexOf('iqamah') === 0) playNotification();
+            lastPhaseKey = key;
+            renderPhase(ph, now);
+        }
+        setInterval(tick, 1000);
+        tick();
+
+        // ---- Pembaruan langsung: pengurus mengubah pengaturan/slide dari panel (mis. lewat ponsel) →
+        //      layar memuat ulang dalam ±10 detik. Ditunda selama layar iqamah/sholat/khutbah.
+        //      Juga memuat ulang saat ganti hari (jadwal baru) dan menyinkronkan ulang jam. ----
         (function() {
-            var loadedDay = new Date().toDateString();
+            var VERSI = "{{ monitor_version }}";
+            var versiUrl = "{% url 'display:versi' %}";
+            var loadedDay = fmtDate.format(new Date(nowMs()));
             var loadedAt = Date.now();
-            function nearPrayer(now) {
-                return Object.values(prayerTimes).some(function(t) { return Math.abs(t - now) < 5 * 60 * 1000; });
+            function check() {
+                fetch(versiUrl, {cache: 'no-store'}).then(function(r) {
+                    var d = Date.parse(r.headers.get('Date'));
+                    if (!isNaN(d)) { var off = d + 500 - Date.now(); if (Math.abs(off - serverOffset) > 3000) serverOffset = off; }
+                    return r.ok ? r.json() : null;
+                }).then(function(data) {
+                    if (!data) return;
+                    var now = nowMs();
+                    var changed = data.versi !== VERSI;
+                    var newDay = fmtDate.format(new Date(now)) !== loadedDay;
+                    var stale = Date.now() - loadedAt > 60 * 60 * 1000;
+                    if ((changed || newDay || stale) && !currentPhase(now)) location.reload();
+                }).catch(function() {});
             }
-            setInterval(function() {
-                var now = new Date();
-                var newDay = now.toDateString() !== loadedDay;
-                var stale = Date.now() - loadedAt > 30 * 60 * 1000;
-                if (!(newDay || stale) || (!newDay && nearPrayer(now))) return;
-                fetch(location.href, {method: 'HEAD', cache: 'no-store'})
-                    .then(function(r) { if (r.ok) location.reload(); })
-                    .catch(function() {});
-            }, 60 * 1000);
+            if (!PREVIEW) setInterval(check, 10 * 1000);
+        })();
+
+        // ---- Layar tetap menyala & kursor disembunyikan ----
+        (function() {
+            async function keepAwake() {
+                try { if ('wakeLock' in navigator && document.visibilityState === 'visible') await navigator.wakeLock.request('screen'); } catch (e) {}
+            }
+            if (!PREVIEW && window.top === window) { document.addEventListener('visibilitychange', keepAwake); keepAwake(); }
+            var idle;
+            function wake() { document.body.classList.remove('hide-cursor'); clearTimeout(idle); idle = setTimeout(function() { document.body.classList.add('hide-cursor'); }, 4000); }
+            document.addEventListener('mousemove', wake);
+            wake();
         })();
 
         // Slideshow Logic
@@ -898,8 +1432,8 @@
                         slide.classList.remove('active');
                     }
                 });
-                const duration = parseInt(slides[index].getAttribute('data-duration')) || 10;
-                setTimeout(nextSlide, duration * 1000);
+                const secs = parseInt(slides[index].getAttribute('data-duration')) || 10;
+                setTimeout(nextSlide, secs * 1000);
             }
 
             function nextSlide() {
@@ -1143,48 +1677,35 @@
                 if (el) el.addEventListener('change', function() { saveDisplay(id === 'dcTheme' ? 'tema' : 'layout', this.value); });
             });
 
-            // Fullscreen functionality
+            // Layar penuh dipasang di bingkai luar (/display/) bila ada, agar tidak lepas saat isi dimuat ulang
+            var fsDoc = document;
+            try { if (window.top !== window && window.top.location.origin === location.origin) fsDoc = window.top.document; } catch (e) {}
             var fsBtn = document.getElementById('dcFullscreenBtn');
             var fsIcon = document.getElementById('fsIcon');
             var fsText = document.getElementById('fsText');
-
-            fsBtn.addEventListener('click', function() {
-                if (!document.fullscreenElement) {
-                    if (document.documentElement.requestFullscreen) {
-                        document.documentElement.requestFullscreen();
-                    } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
-                        document.documentElement.webkitRequestFullscreen();
-                    } else if (document.documentElement.msRequestFullscreen) { /* IE11 */
-                        document.documentElement.msRequestFullscreen();
-                    }
+            function isFull() { return !!(fsDoc.fullscreenElement || fsDoc.webkitFullscreenElement); }
+            function toggleFullscreen() {
+                var el = fsDoc.documentElement;
+                if (!isFull()) {
+                    (el.requestFullscreen || el.webkitRequestFullscreen || function () {}).call(el);
                 } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    } else if (document.webkitExitFullscreen) { /* Safari */
-                        document.webkitExitFullscreen();
-                    } else if (document.msExitFullscreen) { /* IE11 */
-                        document.msExitFullscreen();
-                    }
+                    (fsDoc.exitFullscreen || fsDoc.webkitExitFullscreen || function () {}).call(fsDoc);
                 }
-                // Optional: hide panel after clicking
+            }
+            fsBtn.addEventListener('click', function() {
+                toggleFullscreen();
                 panel.classList.remove('show');
                 trigger.classList.remove('active');
             });
-
-            // Update icon on fullscreen change
-            document.addEventListener('fullscreenchange', updateFullscreenUI);
-            document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
-            document.addEventListener('msfullscreenchange', updateFullscreenUI);
-
+            // Klik dua kali di mana saja = masuk/keluar layar penuh
+            if (!PREVIEW) document.addEventListener('dblclick', function (e) { if (!panel.contains(e.target)) toggleFullscreen(); });
             function updateFullscreenUI() {
-                if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-                    fsIcon.className = 'bi bi-arrows-fullscreen';
-                    fsText.innerText = 'Fullscreen';
-                } else {
-                    fsIcon.className = 'bi bi-fullscreen-exit';
-                    fsText.innerText = 'Exit Fullscreen';
-                }
+                fsIcon.className = isFull() ? 'bi bi-fullscreen-exit' : 'bi bi-arrows-fullscreen';
+                fsText.innerText = isFull() ? 'Keluar Layar Penuh' : 'Layar Penuh';
             }
+            fsDoc.addEventListener('fullscreenchange', updateFullscreenUI);
+            fsDoc.addEventListener('webkitfullscreenchange', updateFullscreenUI);
+            updateFullscreenUI();
         })();
     </script>
 </body>
