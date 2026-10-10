@@ -269,7 +269,8 @@ class KotaView(MobileAPIView):
                    parameters=[OpenApiParameter('search', str, description='Mis. "bandar lampung"; kosong = semua (±518)')])
     def get(self, request):
         cities = kemenag.search_cities(request.query_params.get('search', '').strip())
-        response = Response({'results': [{'id': c.id, 'nama': c.nama, 'daerah': c.daerah or None} for c in cities]})
+        response = Response({'results': [{'id': c.id, 'nama': c.nama, 'daerah': c.daerah or None,
+                                          'ibukota': kemenag.IBUKOTA.get(c.id)} for c in cities]})
         response['Cache-Control'] = 'public, max-age=86400'
         return response
 

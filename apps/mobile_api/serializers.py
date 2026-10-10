@@ -68,6 +68,7 @@ class Kota(s.Serializer):
     id = s.CharField()
     nama = s.CharField()
     daerah = s.CharField(allow_null=True, help_text='Provinsi; terisi setelah jadwal kota itu pernah diambil')
+    ibukota = s.CharField(allow_null=True, help_text='Ibu kota kabupaten bila tidak tersirat di nama (saat ini Lampung)')
 
 
 class KotaList(s.Serializer):

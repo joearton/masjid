@@ -69,6 +69,14 @@ def sync_cities(force=False):
     return len(cities)
 
 
+# Ibu kota kabupaten yang namanya tidak muncul di nama Kemenag (agar "kotabumi" menemukan Lampung Utara).
+IBUKOTA = {
+    '1001': 'Gunung Sugih', '1002': 'Kotabumi', '1003': 'Kalianda', '1004': 'Liwa', '1005': 'Sukadana',
+    '1006': 'Brabasan', '1007': 'Gedong Tataan', '1008': 'Krui', '1009': 'Pringsewu', '1010': 'Menggala',
+    '1011': 'Panaragan', '1012': 'Kota Agung', '1013': 'Blambangan Umpu',
+}
+
+
 def find_city(kota_id):
     if not KotaKemenag.objects.exists():
         sync_cities()
@@ -78,9 +86,15 @@ def find_city(kota_id):
 def search_cities(query=''):
     if not KotaKemenag.objects.exists():
         sync_cities()
+    from django.db.models import Q
     qs = KotaKemenag.objects.all()
-    for word in query.split():
-        qs = qs.filter(nama__icontains=word)
+    words = query.lower().split()
+    if words:
+        alias_ids = [i for i, name in IBUKOTA.items() if all(w in name.lower() for w in words)]
+        by_name = Q()
+        for word in words:
+            by_name &= Q(nama__icontains=word)
+        qs = qs.filter(by_name | Q(id__in=alias_ids))
     return qs
 
 

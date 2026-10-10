@@ -152,6 +152,8 @@ class LokasiPenggunaTests(TestCase):
         self.assertEqual(data['jam']['dzuhur'], '11:51')
 
     def test_city_search_and_official_city_schedule_in_local_time(self):
+        data = self.client.get(API + 'sholat/kota/', {'search': 'Kotabumi'}).json()
+        self.assertEqual([(c['id'], c['ibukota']) for c in data['results']], [('1002', 'Kotabumi')])
         data = self.client.get(API + 'sholat/kota/', {'search': 'makas'}).json()
         self.assertEqual(data['results'][0]['id'], '2622')
         data = self.client.get(API + 'sholat/', {'kota': '2622', 'date': '2026-10-10'}).json()
