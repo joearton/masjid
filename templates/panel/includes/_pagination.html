@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n page_tags %}
 {# Reusable pagination footer for panel list pages #}
 {% if is_paginated %}
 <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-2 px-3">
@@ -11,7 +11,7 @@
         <ul class="pagination pagination-sm mb-0">
             {% if page_obj.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                <a class="page-link" href="{% page_url page_obj.previous_page_number %}">
                     <i class="bi bi-chevron-left"></i>
                 </a>
             </li>
@@ -21,11 +21,11 @@
                 <li class="page-item active"><span class="page-link">{{ num }}</span></li>
                 {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
                 <li class="page-item">
-                    <a class="page-link" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                    <a class="page-link" href="{% page_url num %}">{{ num }}</a>
                 </li>
                 {% elif num == 1 or num == page_obj.paginator.num_pages %}
                 <li class="page-item">
-                    <a class="page-link" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                    <a class="page-link" href="{% page_url num %}">{{ num }}</a>
                 </li>
                 {% elif num == page_obj.number|add:"-3" or num == page_obj.number|add:"3" %}
                 <li class="page-item disabled"><span class="page-link">…</span></li>
@@ -33,7 +33,7 @@
             {% endfor %}
             {% if page_obj.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                <a class="page-link" href="{% page_url page_obj.next_page_number %}">
                     <i class="bi bi-chevron-right"></i>
                 </a>
             </li>

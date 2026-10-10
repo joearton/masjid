@@ -14,9 +14,9 @@ load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-32)!7*4pobcy0ajw^%p68!e)-6en%wg76lu9w)#ipz_2%(mb=q')
 
-DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 't')
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 't')
 
-ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', '*').split(',')]
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')]
 
 # Application definition
 INSTALLED_APPS = [
@@ -30,6 +30,8 @@ INSTALLED_APPS = [
     # Third party
     'crispy_forms',
     'crispy_bootstrap5',
+    'rest_framework',
+    'drf_spectacular',
     # Local apps
     'apps.core',
     'apps.profil',
@@ -39,6 +41,7 @@ INSTALLED_APPS = [
     'apps.keuangan',
     'apps.display',
     'apps.donatur',
+    'apps.mobile_api',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +51,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'apps.core.middleware.LoginThrottleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -122,6 +126,30 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 LOGIN_URL = '/panel/login/'
 LOGIN_REDIRECT_URL = '/panel/'
 LOGOUT_REDIRECT_URL = '/'
+
+# HTTPS (situs di balik Cloudflare + OpenLiteSpeed; pengalihan http→https dilakukan Cloudflare)
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get(
+    'CSRF_TRUSTED_ORIGINS', 'https://masjid.umko.ac.id,https://sadhanattaqwa.umko.ac.id').split(',') if o.strip()]
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_HTTPONLY = True
+SECURE_HSTS_SECONDS = 0 if DEBUG else 60 * 60 * 24 * 30
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {'console': {'class': 'logging.StreamHandler'}},
+    'loggers': {'apps': {'handlers': ['console'], 'level': 'INFO'}},
+}
+
+# API aplikasi MyUMKO (/api/mobile/v1/, apps/mobile_api). Satu-satunya pengaturan DRF global hanya
+# kelas skema; autentikasi, renderer, batas laju, dan galat dipasang per kelas view (common.py).
+REST_FRAMEWORK = {'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'}
+MOBILE_API_THROTTLE_RATES = {'mobile_anon': os.environ.get('MOBILE_API_THROTTLE_ANON', '300/min')}
+MOBILE_API_CACHE_SECONDS = int(os.environ.get('MOBILE_API_CACHE_SECONDS', '300'))
+MASJID_PUBLIC_URL = os.environ.get('MASJID_PUBLIC_URL', 'https://masjid.umko.ac.id')
 
 # Site info (used in context processor)
 SITE_NAME = 'Masjid Al-Ikhlas'

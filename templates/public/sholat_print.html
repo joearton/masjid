@@ -37,7 +37,9 @@
             <thead>
                 <tr>
                     <th>TGL</th>
+                    <th>IMSAK</th>
                     <th>SUBUH</th>
+                    <th>TERBIT</th>
                     <th>DZUHUR</th>
                     <th>ASHAR</th>
                     <th>MAGHRIB</th>
@@ -50,7 +52,9 @@
                     <td class="text-start px-3">
                         {{ j.tanggal|date:"d" }} <span style="font-size:0.8em">/ {{ j.tanggal|hijri_short }}</span>
                     </td>
+                    <td>{{ j.imsak|time:"H:i" }}</td>
                     <td>{{ j.subuh|time:"H:i" }}</td>
+                    <td>{{ j.terbit|time:"H:i" }}</td>
                     <td>{{ j.dzuhur|time:"H:i" }}</td>
                     <td>{{ j.ashar|time:"H:i" }}</td>
                     <td>{{ j.maghrib|time:"H:i" }}</td>
@@ -59,6 +63,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        <p class="small mb-0">{% include "public/includes/sumber_jadwal.html" %}</p>
 
         <div class="mt-4 row">
             <div class="col-6">

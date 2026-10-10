@@ -1,31 +1,15 @@
-from django.utils import timezone
+import logging
+
 from .utils import get_prayer_times
 
+logger = logging.getLogger(__name__)
+
+
 def sholat_today(request):
-    """
-    Inject jadwal sholat hari ini ke semua template.
-    Source: AdhanPy Calculation (SholatSettings)
-    """
+    """Inject jadwal sholat hari ini ke semua template."""
     try:
-        today = timezone.localdate()
+        pt = get_prayer_times()
     except Exception:
-        today = timezone.now().date()
-        
-    jadwal = None
-    # Calculate dynamically using utils
-    try:
-        pt = get_prayer_times(today)
-        if pt:
-            # Return object-like for template (using datetime objects)
-            jadwal = {
-                'subuh': pt.fajr,
-                'terbit': pt.sunrise, 
-                'dzuhur': pt.dhuhr,
-                'ashar': pt.asr,
-                'maghrib': pt.maghrib,
-                'isya': pt.isha,
-            }
-    except Exception:
-        jadwal = None
-        
-    return {'jadwal_hari_ini': jadwal}
+        logger.exception('Gagal menyiapkan jadwal sholat hari ini')
+        return {'jadwal_hari_ini': None}
+    return {'jadwal_hari_ini': pt.as_dict()}

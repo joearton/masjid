@@ -41,6 +41,10 @@ class DonaturForm(forms.ModelForm):
         )
 
 class PublicDonaturForm(forms.ModelForm):
+    # Jebakan bot: tersembunyi bagi manusia, biasanya diisi oleh bot.
+    website = forms.CharField(required=False, label='', widget=forms.TextInput(attrs={
+        'autocomplete': 'off', 'tabindex': '-1', 'class': 'd-none', 'aria-hidden': 'true'}))
+
     class Meta:
         model = Donatur
         fields = ['nama', 'alamat', 'telepon', 'tipe', 'komitmen_rutin', 'tipe_rutin', 'keterangan']
@@ -78,9 +82,16 @@ class PublicDonaturForm(forms.ModelForm):
             ),
             HTML('</div>'),
             'keterangan',
+            'website',
             Submit('submit', _('Daftar Jadi Donatur'), css_class='btn btn-success w-100')
         )
         
+        self.fields['telepon'].required = True
         self.fields['tipe'].widget.attrs.update({
             'onchange': "if(this.value === 'tetap') { document.getElementById('collapseRutin').classList.add('show'); } else { document.getElementById('collapseRutin').classList.remove('show'); }"
         })
+
+    def clean_website(self):
+        if self.cleaned_data.get('website'):
+            raise forms.ValidationError(_('Permintaan ditolak.'))
+        return ''

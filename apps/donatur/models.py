@@ -8,6 +8,7 @@ class Donatur(models.Model):
     ]
     
     STATUS_CHOICES = [
+        ('baru', _('Baru (menunggu konfirmasi)')),
         ('aktif', _('Aktif')),
         ('nonaktif', _('Nonaktif')),
     ]

@@ -17,16 +17,16 @@
     </div>
 </div>
 
-<div class="container py-5">
+<div class="container py-4 py-lg-5">
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm">
                 {% if object.gambar %}
                 <img src="{{ object.gambar.url }}" class="card-img-top" alt="{{ object.judul }}" style="max-height:400px;object-fit:cover">
                 {% endif %}
-                <div class="card-body p-4 p-lg-5">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <h1 class="h3 fw-bold">{{ object.judul }}</h1>
+                <div class="card-body p-3 p-sm-4 p-lg-5">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                        <h1 class="h3 fw-bold mb-0">{{ object.judul }}</h1>
                         <span class="badge
                             {% if object.status == 'upcoming' %}bg-success
                             {% elif object.status == 'ongoing' %}bg-warning text-dark
@@ -44,7 +44,7 @@
 
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white fw-bold border-bottom">{% trans "Detail Kegiatan" %}</div>
+                <div class="card-header py-3">{% trans "Detail Kegiatan" %}</div>
                 <div class="list-group list-group-flush">
                     <div class="list-group-item py-3">
                         <div class="text-muted small mb-1">{% trans "Tanggal" %}</div>

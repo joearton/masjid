@@ -22,7 +22,7 @@ class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
         if self.request.user.is_authenticated:
             messages.error(self.request, _('Anda tidak memiliki akses ke halaman ini.'))
             from django.shortcuts import redirect
-            return redirect('core:panel_dashboard')
+            return redirect('panel:dashboard')
         return super().handle_no_permission()
 
 

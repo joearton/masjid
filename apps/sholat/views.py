@@ -1,15 +1,19 @@
 """Sholat views — public and admin panel."""
-from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView
 import datetime
 
+from django.contrib import messages
+from django.urls import reverse_lazy
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.views.generic import TemplateView
+
 from apps.core.mixins import (
-    PublicListView, PanelListView,
-    PanelCreateView, PanelUpdateView, PanelDeleteView
+    PanelListView, PanelCreateView, PanelUpdateView, PanelDeleteView,
 )
 from .models import JadwalJumat, SholatSettings
 from .forms import JadwalJumatForm, SholatSettingsForm
+from . import kemenag
+from .utils import get_month_schedule, get_prayer_times, get_settings
 
 
 # ─── Public Views ────────────────────────────────────────────────────────────
@@ -20,41 +24,14 @@ class JadwalSholatPublicView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = _('Jadwal Sholat')
-        today = datetime.date.today()
-        from apps.sholat.utils import get_prayer_times
-        import calendar
-        
-        # Today's prayer times
-        pt_today = get_prayer_times(today)
-        if pt_today:
-            context['jadwal_hari_ini'] = {
-                'tanggal': today,
-                'subuh': pt_today.fajr,
-                'terbit': pt_today.sunrise,
-                'dzuhur': pt_today.dhuhr,
-                'ashar': pt_today.asr,
-                'maghrib': pt_today.maghrib,
-                'isya': pt_today.isha,
-            }
-        
-        # Monthly schedule
-        month_schedule = []
-        __, num_days = calendar.monthrange(today.year, today.month)
-        for d in range(1, num_days + 1):
-             curr_date = datetime.date(today.year, today.month, d)
-             pt = get_prayer_times(curr_date)
-             if pt:
-                 month_schedule.append({
-                     'tanggal': curr_date,
-                     'subuh': pt.fajr,
-                     'terbit': pt.sunrise,
-                     'dzuhur': pt.dhuhr,
-                     'ashar': pt.asr,
-                     'maghrib': pt.maghrib,
-                     'isya': pt.isha
-                 })
-
-        context['jadwal_bulan_ini'] = month_schedule
+        today = timezone.localdate()
+        settings = get_settings()
+        month = get_month_schedule(today.year, today.month, settings)
+        today_pt = next((pt for pt in month if pt.tanggal == today), None)
+        context['jadwal_hari_ini'] = today_pt.as_dict() if today_pt else None
+        context['jadwal_bulan_ini'] = [pt.as_dict() for pt in month]
+        context['sumber_jadwal'] = 'kemenag' if month and all(pt.source == 'kemenag' for pt in month) else 'hisab'
+        context['sholat_settings'] = settings
         context['jadwal_jumat'] = JadwalJumat.objects.order_by('-tanggal')[:5]
         return context
 
@@ -63,16 +40,12 @@ class JadwalSholatPrintView(JadwalSholatPublicView):
     template_name = 'public/sholat_print.html'
 
 
-# ─── Panel Views ─────────────────────────────────────────────────────────────
-
-
-# ─── Panel Views ─────────────────────────────────────────────────────────────
-
 class PanelSholatSettingsView(PanelUpdateView):
     model = SholatSettings
     form_class = SholatSettingsForm
     page_title = _('Pengaturan Sholat')
-    form_title = _('Konfigurasi Sholat (AdhanPy)')
+    form_title = _('Sumber jadwal, lokasi, dan koreksi waktu')
+    template_name = 'panel/sholat/settings.html'
     back_url = reverse_lazy('panel:dashboard')
     success_url = reverse_lazy('sholat:panel_settings')
 
@@ -84,34 +57,20 @@ class PanelSholatSettingsView(PanelUpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        # Add prayer schedule preview for current month
-        from .utils import get_prayer_times
-        from datetime import date
-        import calendar
-
-        today = date.today()
-        _, num_days = calendar.monthrange(today.year, today.month)
-        
-        jadwal_preview = []
-        # Preview first 5 days + today + last day as sample, or just today
-        preview_dates = [today]
-        
-        for d in preview_dates:
-            pt = get_prayer_times(d)
-            if pt:
-                jadwal_preview.append({
-                    'tanggal': d,
-                    'subuh': pt.fajr,
-                    'terbit': pt.sunrise,
-                    'dzuhur': pt.dhuhr,
-                    'ashar': pt.asr,
-                    'maghrib': pt.maghrib,
-                    'isya': pt.isha
-                })
-        
-        context['jadwal_preview'] = jadwal_preview
+        today = timezone.localdate()
+        context['jadwal_preview'] = [
+            get_prayer_times(today + datetime.timedelta(days=i), self.object).as_dict() for i in range(7)
+        ]
         return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        obj = self.object
+        if obj.sumber == SholatSettings.SUMBER_KEMENAG:
+            today = timezone.localdate()
+            if not kemenag.fetch_month(obj.kota_kemenag_id, today.year, today.month, force=True):
+                messages.warning(self.request, _('Jadwal resmi Kemenag belum dapat diambil; sementara memakai hisab dari koordinat masjid.'))
+        return response
 
 
 class PanelJadwalJumatList(PanelListView):

@@ -88,16 +88,7 @@ class Command(BaseCommand):
 
     def create_sholat_settings(self):
         if not SholatSettings.objects.exists():
-            SholatSettings.objects.create(
-                latitude=-6.2088,
-                longitude=106.8456,
-                timezone='Asia/Jakarta',
-                koreksi_subuh=2,
-                koreksi_dzuhur=2,
-                koreksi_ashar=2,
-                koreksi_maghrib=2,
-                koreksi_isya=2
-            )
+            SholatSettings.objects.create()  # bawaan: jadwal resmi Kemenag Kab. Lampung Utara
             self.stdout.write('Created Sholat Settings')
 
     def create_berita(self):

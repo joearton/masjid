@@ -2,6 +2,7 @@
 {% load i18n static %}
 
 {% block body %}
+<a class="skip-link" href="#main-content">{% trans "Langsung ke konten" %}</a>
 <!-- Navbar -->
 {% include "components/navbar.html" %}
 
@@ -9,7 +10,7 @@
 {% include "components/messages.html" %}
 
 <!-- Main Content -->
-<main>
+<main id="main-content">
     {% block content %}{% endblock %}
 </main>
 

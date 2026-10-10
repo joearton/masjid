@@ -18,15 +18,26 @@ class SholatSettingsForm(forms.ModelForm):
         self.helper.form_method = 'post'
         self.helper.layout = Layout(
             Fieldset(
-                _('Konfigurasi Lokasi (AdhanPy)'),
+                _('Sumber Jadwal'),
+                'sumber',
                 Row(
-                    Column('latitude', css_class='col-md-4'),
-                    Column('longitude', css_class='col-md-4'),
-                    Column('timezone', css_class='col-md-4'),
+                    Column('kota_kemenag_id', css_class='col-md-4'),
+                    Column('kota_kemenag_nama', css_class='col-md-8'),
                 ),
             ),
             Fieldset(
-                _('Koreksi Waktu (Menit)'),
+                _('Lokasi Masjid (untuk hisab)'),
+                Row(
+                    Column('latitude', css_class='col-md-3'),
+                    Column('longitude', css_class='col-md-3'),
+                    Column('elevasi', css_class='col-md-2'),
+                    Column('ihtiyat', css_class='col-md-2'),
+                    Column('timezone', css_class='col-md-2'),
+                ),
+                css_class='mt-3'
+            ),
+            Fieldset(
+                _('Koreksi Tambahan (menit, biasanya 0)'),
                 Row(
                     Column('koreksi_subuh', css_class='col-md-2'),
                     Column('koreksi_dzuhur', css_class='col-md-2'),
@@ -38,6 +49,24 @@ class SholatSettingsForm(forms.ModelForm):
             ),
             Submit('submit', _('Simpan Pengaturan'), css_class='btn btn-primary')
         )
+
+    def clean_timezone(self):
+        from zoneinfo import ZoneInfo
+        value = self.cleaned_data['timezone']
+        try:
+            ZoneInfo(value)
+        except Exception:
+            raise forms.ValidationError(_('Zona waktu tidak dikenal. Contoh: Asia/Jakarta'))
+        return value
+
+    def clean(self):
+        data = super().clean()
+        lat, lon = data.get('latitude'), data.get('longitude')
+        if lat is not None and not -90 <= lat <= 90:
+            self.add_error('latitude', _('Latitude harus antara -90 dan 90.'))
+        if lon is not None and not -180 <= lon <= 180:
+            self.add_error('longitude', _('Longitude harus antara -180 dan 180.'))
+        return data
 
 
 class JadwalJumatForm(forms.ModelForm):

@@ -9,6 +9,7 @@ from django.conf.urls.i18n import i18n_patterns
 urlpatterns = [
     path('django-admin/', admin.site.urls),
     path('i18n/', include('django.conf.urls.i18n')),
+    path('api/mobile/v1/', include('apps.mobile_api.urls')),  # API aplikasi MyUMKO
 ]
 
 urlpatterns += i18n_patterns(

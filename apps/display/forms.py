@@ -45,7 +45,7 @@ class DisplaySettingsForm(forms.ModelForm):
 class DisplaySlideForm(forms.ModelForm):
     class Meta:
         model = DisplaySlide
-        fields = '__all__'
+        exclude = ['display']  # ditentukan dari URL, bukan dari formulir
         widgets = {
             'konten_teks': forms.Textarea(attrs={'rows': 4}),
         }

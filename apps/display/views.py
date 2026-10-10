@@ -45,7 +45,7 @@ class DisplayView(TemplateView):
         context['layout_choices'] = DisplaySettings.LAYOUT_CHOICES
         
         # Get Prayer Times
-        pt = get_prayer_times(timezone.now())
+        pt = get_prayer_times(timezone.localdate())
         context['prayer_times'] = pt
         
         context['profil'] = ProfilMasjid.objects.first()
@@ -61,9 +61,8 @@ class DisplayView(TemplateView):
         # Context for specific slide types
         from apps.kegiatan.models import Kegiatan
         from apps.berita.models import Berita
-        import datetime
         
-        context['kegiatan_list'] = Kegiatan.objects.filter(tanggal__gte=datetime.date.today()).order_by('tanggal')[:5]
+        context['kegiatan_list'] = Kegiatan.objects.filter(tanggal__gte=timezone.localdate()).order_by('tanggal')[:5]
         context['berita_list'] = Berita.objects.filter(is_published=True).order_by('-created_at')[:5]
 
         return context
@@ -71,14 +70,15 @@ class DisplayView(TemplateView):
 
 from django.http import JsonResponse
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class DisplayUpdateAPIView(View):
-    """Quick AJAX endpoint to switch theme/layout for a display."""
+    """Quick AJAX endpoint to switch theme/layout for a display (pengurus saja)."""
+    http_method_names = ['post']
+
     def post(self, request, pk):
+        if not request.user.is_staff:
+            return JsonResponse({'ok': False, 'error': 'forbidden'}, status=403)
         display = get_object_or_404(DisplaySettings, pk=pk)
         tema = request.POST.get('tema')
         layout = request.POST.get('layout')
@@ -88,7 +88,7 @@ class DisplayUpdateAPIView(View):
             display.tema = tema
         if layout and layout in valid_layouts:
             display.layout = layout
-        display.save()
+        display.save(update_fields=['tema', 'layout', 'updated_at'])
         return JsonResponse({'ok': True, 'tema': display.tema, 'layout': display.layout})
 
 

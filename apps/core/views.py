@@ -2,7 +2,8 @@
 
 from django.views.generic import TemplateView, UpdateView
 from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -13,8 +14,8 @@ from apps.berita.models import Berita
 from apps.kegiatan.models import Kegiatan
 from apps.core.models import SiteSetting
 from apps.core.forms import SiteSettingForm
+from apps.core.mixins import StaffRequiredMixin
 from apps.donatur.forms import PublicDonaturForm
-import datetime
 
 class HomeView(TemplateView):
     template_name = 'public/home.html'
@@ -26,7 +27,7 @@ class HomeView(TemplateView):
             is_published=True
         ).order_by('-created_at')[:3]
         context['kegiatan_mendatang'] = Kegiatan.objects.filter(
-            tanggal__gte=datetime.date.today()
+            tanggal__gte=timezone.localdate()
         ).order_by('tanggal')[:4]
         # context['jadwal_hari_ini'] is handled globally by context_processor
         context['donatur_form'] = PublicDonaturForm()
@@ -39,6 +40,9 @@ class PanelLoginView(LoginView):
     redirect_authenticated_user = True
 
     def get_success_url(self):
+        nxt = self.request.POST.get('next') or self.request.GET.get('next')
+        if nxt and url_has_allowed_host_and_scheme(nxt, {self.request.get_host()}, self.request.is_secure()):
+            return nxt
         return settings.LOGIN_REDIRECT_URL
 
     def form_invalid(self, form):
@@ -50,7 +54,7 @@ class PanelLogoutView(LogoutView):
     next_page = '/'
 
 
-class PanelDashboardView(LoginRequiredMixin, TemplateView):
+class PanelDashboardView(StaffRequiredMixin, TemplateView):
     template_name = 'panel/dashboard.html'
 
     def get_context_data(self, **kwargs):
@@ -59,7 +63,7 @@ class PanelDashboardView(LoginRequiredMixin, TemplateView):
         context['total_berita'] = Berita.objects.count()
         context['total_kegiatan'] = Kegiatan.objects.count()
         context['kegiatan_mendatang'] = Kegiatan.objects.filter(
-            tanggal__gte=datetime.date.today()
+            tanggal__gte=timezone.localdate()
         ).order_by('tanggal')[:5]
         context['berita_terbaru'] = Berita.objects.order_by('-created_at')[:5]
         
@@ -70,7 +74,7 @@ class PanelDashboardView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class PanelSiteSettingView(LoginRequiredMixin, UpdateView):
+class PanelSiteSettingView(StaffRequiredMixin, UpdateView):
     """Panel view for editing the SiteSetting singleton."""
     template_name = 'panel/core/site_setting.html'
     form_class = SiteSettingForm

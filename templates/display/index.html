@@ -602,8 +602,8 @@
     </style>
 </head>
 <body class="theme-{{ display_settings.tema|default:'default' }} layout-{{ display_settings.layout|default:'classic' }}">
-    {% if display_settings.video_url %}
-        <img src="https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=2070&auto=format&fit=crop" class="bg-media" alt="Background">
+    {% if display_settings.video_url and display_settings.video_url|lower|slice:"-4:" == ".mp4" or display_settings.video_url and display_settings.video_url|lower|slice:"-5:" == ".webm" %}
+        <video src="{{ display_settings.video_url }}" class="bg-media" autoplay muted loop playsinline></video>
     {% else %}
         <img src="https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=2070&auto=format&fit=crop" class="bg-media" alt="Background">
     {% endif %}
@@ -796,59 +796,6 @@
             }
         }
 
-        // ── Hijri date computation (client-side) ──
-        const HIJRI_MONTHS = [
-            '', 'Muharram', 'Safar', "Rabi'ul Awal", "Rabi'ul Akhir",
-            'Jumadil Awal', 'Jumadil Akhir', 'Rajab', "Sya'ban",
-            'Ramadan', 'Syawal', "Dzulqa'dah", 'Dzulhijjah'
-        ];
-        const HARI_ID = ['Ahad', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-
-        function gregorianToHijri(year, month, day) {
-            // Kuwaiti algorithm for Gregorian to Hijri conversion
-            var m = month;
-            var y = year;
-            if (m < 3) { y -= 1; m += 12; }
-            var a = Math.floor(y / 100);
-            var b = 2 - a + Math.floor(a / 4);
-            if (y < 1583) b = 0;
-            if (y === 1582) {
-                if (m > 10) b = -10;
-                if (m === 10 && day > 14) b = -10;
-            }
-            var jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + b - 1524;
-            b = 0;
-            if (jd > 2299160) {
-                a = Math.floor((jd - 1867216.25) / 36524.25);
-                b = 1 + a - Math.floor(a / 4);
-            }
-            var bb = jd + b + 1524;
-            var cc = Math.floor((bb - 122.1) / 365.25);
-            var dd = Math.floor(365.25 * cc);
-            var ee = Math.floor((bb - dd) / 30.6001);
-            day = bb - dd - Math.floor(30.6001 * ee);
-            if (ee === 14 || ee === 15) month = ee - 13; else month = ee - 1;
-            if (month > 2) year = cc - 4716; else year = cc - 4715;
-            // Gregorian to Julian Day Number done, now to Hijri
-            var wd = (jd + 1) % 7; // 0=Sun, 1=Mon... 6=Sat
-            var l = jd - 1948440 + 10632;
-            var n = Math.floor((l - 1) / 10631);
-            l = l - 10631 * n + 354;
-            var j = Math.floor((10985 - l) / 5316) * Math.floor((50 * l) / 17719) + Math.floor(l / 5670) * Math.floor((43 * l) / 15238);
-            l = l - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50) - Math.floor(j / 16) * Math.floor((15238 * j) / 43) + 29;
-            var hm = Math.floor((24 * l) / 709);
-            var hd = l - Math.floor((709 * hm) / 24);
-            var hy = 30 * n + j - 30;
-            return { day: hd, month: hm, year: hy, weekday: wd };
-        }
-
-        function getHijriString(dt) {
-            var h = gregorianToHijri(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
-            var dayName = HARI_ID[dt.getDay()];
-            var monthName = HIJRI_MONTHS[h.month] || h.month;
-            return '☪ ' + dayName + ', ' + h.day + ' ' + monthName + ' ' + h.year + ' H';
-        }
-
         function updateClock() {
             const now = new Date();
             const timeString = now.toLocaleTimeString('id-ID', { hour12: false });
@@ -856,7 +803,6 @@
 
             document.getElementById('clock').innerText = timeString;
             document.getElementById('date').innerText = dateString;
-            document.getElementById('hijri-date').innerText = getHijriString(now);
 
             updateNextPrayer(now);
         }
@@ -919,6 +865,25 @@
 
         setInterval(updateClock, 1000);
         updateClock();
+
+        // Muat ulang agar jadwal hari berikutnya, slide, dan saldo selalu terbaru.
+        // Hanya bila server bisa dijangkau dan tidak dekat waktu sholat (notifikasi tetap berbunyi).
+        (function() {
+            var loadedDay = new Date().toDateString();
+            var loadedAt = Date.now();
+            function nearPrayer(now) {
+                return Object.values(prayerTimes).some(function(t) { return Math.abs(t - now) < 5 * 60 * 1000; });
+            }
+            setInterval(function() {
+                var now = new Date();
+                var newDay = now.toDateString() !== loadedDay;
+                var stale = Date.now() - loadedAt > 30 * 60 * 1000;
+                if (!(newDay || stale) || (!newDay && nearPrayer(now))) return;
+                fetch(location.href, {method: 'HEAD', cache: 'no-store'})
+                    .then(function(r) { if (r.ok) location.reload(); })
+                    .catch(function() {});
+            }, 60 * 1000);
+        })();
 
         // Slideshow Logic
         const slides = document.querySelectorAll('.slide');
@@ -1094,6 +1059,7 @@
         <div class="dc-current-name">{{ display_settings.nama }}</div>
         <div class="dc-divider"></div>
 
+        {% if request.user.is_staff %}
         <!-- Theme Selector -->
         <div class="dc-label">Tema</div>
         <select class="dc-select" id="dcTheme">
@@ -1113,6 +1079,7 @@
         </select>
 
         <div class="dc-divider"></div>
+        {% endif %}
 
         <!-- Fullscreen Toggle -->
         <div class="dc-label">Layar</div>
@@ -1162,23 +1129,18 @@
             });
 
             // Theme / Layout change → AJAX POST → reload
-            var displayPk = {{ display_settings.pk }};
-            var apiUrl = '/display/' + displayPk + '/update/';
+            var apiUrl = "{% url 'display:api_update' pk=display_settings.pk %}";
+            var csrfToken = "{{ csrf_token }}";
 
-            document.getElementById('dcTheme').addEventListener('change', function() {
+            function saveDisplay(field, value) {
                 var fd = new FormData();
-                fd.append('tema', this.value);
-                fetch(apiUrl, {method: 'POST', body: fd}).then(function() {
-                    location.reload();
-                });
-            });
-
-            document.getElementById('dcLayout').addEventListener('change', function() {
-                var fd = new FormData();
-                fd.append('layout', this.value);
-                fetch(apiUrl, {method: 'POST', body: fd}).then(function() {
-                    location.reload();
-                });
+                fd.append(field, value);
+                fetch(apiUrl, {method: 'POST', body: fd, headers: {'X-CSRFToken': csrfToken}, credentials: 'same-origin'})
+                    .then(function(r) { if (r.ok) location.reload(); else alert('Gagal menyimpan (' + r.status + '). Masuk ke panel sebagai pengurus.'); });
+            }
+            ['dcTheme', 'dcLayout'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.addEventListener('change', function() { saveDisplay(id === 'dcTheme' ? 'tema' : 'layout', this.value); });
             });
 
             // Fullscreen functionality

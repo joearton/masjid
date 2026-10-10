@@ -5,19 +5,24 @@
 {% block body %}
 <div class="login-page d-flex align-items-center justify-content-center min-vh-100">
     <div class="login-card">
-        <div class="text-center mb-4">
-            <div class="login-icon mb-3">
-                <i class="bi bi-building display-4 text-warning"></i>
+        <div class="text-center mb-4 login-brand">
+            <div class="mb-3 d-flex justify-content-center">
+                {% if site_setting and site_setting.logo %}
+                <span class="brand-mark has-logo" style="width:64px;height:64px;border-radius:18px;background:#fff"><img src="{{ site_setting.logo.url }}" alt=""></span>
+                {% else %}
+                <span class="brand-mark"><i class="bi bi-moon-stars-fill" aria-hidden="true"></i></span>
+                {% endif %}
             </div>
-            <h4 class="fw-bold">{{ SITE_NAME }}</h4>
-            <p class="text-muted small">{% trans "Panel Administrasi" %}</p>
+            <h4 class="fw-bold mb-1">{{ SITE_NAME }}</h4>
+            <p class="small mb-0">{% trans "Panel Administrasi" %}</p>
         </div>
 
         {% include "components/messages.html" %}
 
-        <div class="card border-0 shadow-lg">
-            <div class="card-body p-4">
-                <h5 class="fw-bold mb-4 text-center">{% trans "Masuk ke Panel" %}</h5>
+        <div class="card">
+            <div class="card-body p-4 p-sm-5">
+                <h1 class="h5 fw-bold mb-1">{% trans "Masuk ke Panel" %}</h1>
+                <p class="text-muted small mb-4">{% trans "Khusus pengurus masjid." %}</p>
                 <form method="post">
                     {% csrf_token %}
                     {% for field in form %}
@@ -43,7 +48,7 @@
         </div>
 
         <div class="text-center mt-3">
-            <a href="{% url 'core:home' %}" class="text-muted small">
+            <a href="{% url 'core:home' %}" class="login-back small">
                 <i class="bi bi-arrow-left me-1"></i>{% trans "Kembali ke Website" %}
             </a>
         </div>

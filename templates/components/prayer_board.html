@@ -1,0 +1,42 @@
+{% load i18n hijri_tags %}
+{# Papan waktu sholat dengan hitung mundur. Parameter: j (jadwal_hari_ini), wide, flat, show_source #}
+<div class="prayer-panel{% if flat %} is-flat{% endif %}" data-prayer-board data-tomorrow-label="{% trans 'besok' %}" data-l-h="{% trans 'jam' %}" data-l-m="{% trans 'menit' %}" data-l-s="{% trans 'detik lagi' %}">
+    <div class="prayer-panel-head">
+        <div>
+            <div class="prayer-panel-label">{% trans "Sholat berikutnya" %}</div>
+            <div class="next-prayer-name"><span data-next-name>—</span> <small data-next-time></small></div>
+            <div class="next-prayer-countdown" data-next-countdown aria-live="off">&nbsp;</div>
+        </div>
+        <div class="prayer-panel-date">
+            {{ j.tanggal|date:"l, j F Y" }}<br>
+            <span class="text-primary fw-semibold">{{ j.tanggal|hijri }}</span>
+        </div>
+    </div>
+    <div class="prayer-grid{% if wide %} prayer-grid-wide{% endif %}">
+        <div class="prayer-cell" data-prayer="{% trans 'Subuh' %}" data-time="{{ j.subuh|date:'c' }}">
+            <i class="bi bi-cloud-moon prayer-cell-icon" aria-hidden="true"></i>
+            <span class="prayer-cell-name">{% trans "Subuh" %}</span><span class="prayer-cell-time">{{ j.subuh|time:"H:i" }}</span>
+        </div>
+        <div class="prayer-cell is-minor" data-minor data-time="{{ j.terbit|date:'c' }}">
+            <i class="bi bi-sunrise prayer-cell-icon" aria-hidden="true"></i>
+            <span class="prayer-cell-name">{% trans "Terbit" %}</span><span class="prayer-cell-time">{{ j.terbit|time:"H:i" }}</span>
+        </div>
+        <div class="prayer-cell" data-prayer="{% trans 'Dzuhur' %}" data-time="{{ j.dzuhur|date:'c' }}">
+            <i class="bi bi-sun prayer-cell-icon" aria-hidden="true"></i>
+            <span class="prayer-cell-name">{% trans "Dzuhur" %}</span><span class="prayer-cell-time">{{ j.dzuhur|time:"H:i" }}</span>
+        </div>
+        <div class="prayer-cell" data-prayer="{% trans 'Ashar' %}" data-time="{{ j.ashar|date:'c' }}">
+            <i class="bi bi-cloud-sun prayer-cell-icon" aria-hidden="true"></i>
+            <span class="prayer-cell-name">{% trans "Ashar" %}</span><span class="prayer-cell-time">{{ j.ashar|time:"H:i" }}</span>
+        </div>
+        <div class="prayer-cell" data-prayer="{% trans 'Maghrib' %}" data-time="{{ j.maghrib|date:'c' }}">
+            <i class="bi bi-sunset prayer-cell-icon" aria-hidden="true"></i>
+            <span class="prayer-cell-name">{% trans "Maghrib" %}</span><span class="prayer-cell-time">{{ j.maghrib|time:"H:i" }}</span>
+        </div>
+        <div class="prayer-cell" data-prayer="{% trans 'Isya' %}" data-time="{{ j.isya|date:'c' }}">
+            <i class="bi bi-moon-stars prayer-cell-icon" aria-hidden="true"></i>
+            <span class="prayer-cell-name">{% trans "Isya" %}</span><span class="prayer-cell-time">{{ j.isya|time:"H:i" }}</span>
+        </div>
+    </div>
+    {% if j.imsak %}<div class="prayer-source"><i class="bi bi-info-circle" aria-hidden="true"></i><span>{% trans "Imsak" %} {{ j.imsak|time:"H:i" }}{% if show_source %} · {% include "public/includes/sumber_jadwal.html" %}{% endif %}</span></div>{% endif %}
+</div>

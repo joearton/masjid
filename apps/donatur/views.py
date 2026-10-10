@@ -41,7 +41,11 @@ class PanelDonaturDelete(PanelDeleteView):
 class PublicDonaturRegisterView(CreateView):
     model = Donatur
     form_class = PublicDonaturForm
-    template_name = 'public/donatur_register.html' 
+    template_name = 'public/donatur_register.html'
+
+    def form_valid(self, form):
+        form.instance.status = 'baru'
+        return super().form_valid(form)
     
     def get_success_url(self):
         messages.success(self.request, _('Terima kasih, pendaftaran donatur berhasil! Pengurus akan menghubungi Anda segera.'))

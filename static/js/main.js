@@ -6,32 +6,34 @@ document.addEventListener('DOMContentLoaded', function () {
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.querySelector('.sidebar');
 
+    const backdrop = document.getElementById('sidebarBackdrop');
     if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', function () {
-            sidebar.classList.toggle('show');
-        });
-
-        // Close sidebar on outside click (mobile)
-        document.addEventListener('click', function (e) {
-            if (window.innerWidth < 992) {
-                if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
-                    sidebar.classList.remove('show');
-                }
-            }
-        });
+        const setOpen = function (open) {
+            sidebar.classList.toggle('show', open);
+            if (backdrop) backdrop.classList.toggle('show', open);
+            sidebarToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        };
+        sidebarToggle.addEventListener('click', function () { setOpen(!sidebar.classList.contains('show')); });
+        if (backdrop) backdrop.addEventListener('click', function () { setOpen(false); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
     }
 
     // ── Navbar Scroll Effect ───────────────────────────────────
     const navbar = document.getElementById('mainNavbar');
     if (navbar) {
-        window.addEventListener('scroll', function () {
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
+        const onScroll = function () { navbar.classList.toggle('scrolled', window.scrollY > 8); };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
     }
+
+    // ── Prayer boards (hitung mundur sholat berikutnya) ────────
+    document.querySelectorAll('[data-prayer-board]').forEach(initPrayerBoard);
+
+    // ── Jadwal bulanan: gulir ke baris hari ini ────────────────
+    document.querySelectorAll('.table-scroll').forEach(function (box) {
+        const today = box.querySelector('tr.is-today');
+        if (today) box.scrollTop = Math.max(0, today.offsetTop - 120);
+    });
 
     // ── Auto-dismiss Alerts ────────────────────────────────────
     const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
@@ -42,9 +44,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 5000);
     });
 
-    // ── Prayer Time Countdown ──────────────────────────────────
-    updatePrayerCountdown();
-
     // ── Add form-control class to login form inputs ────────────
     const loginInputs = document.querySelectorAll('.login-card input');
     loginInputs.forEach(function (input) {
@@ -52,34 +51,42 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-function updatePrayerCountdown() {
-    const countdownEl = document.getElementById('prayerCountdown');
-    if (!countdownEl) return;
+function initPrayerBoard(board) {
+    const cells = Array.from(board.querySelectorAll('[data-time]'));
+    const prayers = cells.filter(function (c) { return c.dataset.prayer && c.dataset.time; });
+    if (!prayers.length) return;
+    const nameEl = board.querySelector('[data-next-name]');
+    const timeEl = board.querySelector('[data-next-time]');
+    const countEl = board.querySelector('[data-next-countdown]');
+    const pad = function (n) { return String(n).padStart(2, '0'); };
+    const fmt = function (d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
 
-    const times = JSON.parse(countdownEl.dataset.times || '{}');
-    const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
-
-    let nextPrayer = null;
-    let nextTime = null;
-
-    for (const [name, time] of Object.entries(times)) {
-        const [h, m] = time.split(':').map(Number);
-        const prayerDate = new Date(now);
-        prayerDate.setHours(h, m, 0, 0);
-
-        if (prayerDate > now) {
-            if (!nextTime || prayerDate < nextTime) {
-                nextPrayer = name;
-                nextTime = prayerDate;
-            }
+    function tick() {
+        const now = new Date();
+        let next = null, nextTime = null, tomorrow = false;
+        for (const c of prayers) {
+            const t = new Date(c.dataset.time);
+            if (t > now) { next = c; nextTime = t; break; }
         }
+        if (!next) {  // setelah Isya: Subuh besok (perkiraan +24 jam)
+            next = prayers[0];
+            nextTime = new Date(new Date(next.dataset.time).getTime() + 864e5);
+            tomorrow = true;
+        }
+        cells.forEach(function (c) {
+            const t = new Date(c.dataset.time);
+            c.classList.toggle('is-next', c === next && !tomorrow);
+            c.classList.toggle('is-past', !tomorrow && t <= now && c !== next);
+        });
+        if (tomorrow) next.classList.add('is-next');
+        const diff = Math.max(0, nextTime - now);
+        const h = Math.floor(diff / 36e5), m = Math.floor((diff % 36e5) / 6e4), s = Math.floor((diff % 6e4) / 1e3);
+        if (nameEl) nameEl.textContent = next.dataset.prayer + (tomorrow ? ' ' + (board.dataset.tomorrowLabel || 'besok') : '');
+        const tEl = next.querySelector('.prayer-cell-time');  // jam lokal masjid, bukan zona waktu peramban
+        if (timeEl) timeEl.textContent = tEl ? tEl.textContent : fmt(nextTime);
+        const L = board.dataset;
+        if (countEl) countEl.textContent = (h ? h + ' ' + (L.lH || 'jam') + ' ' : '') + m + ' ' + (L.lM || 'menit') + ' ' + pad(s) + ' ' + (L.lS || 'detik lagi');
     }
-
-    if (nextPrayer && nextTime) {
-        const diff = nextTime - now;
-        const hours = Math.floor(diff / 3600000);
-        const minutes = Math.floor((diff % 3600000) / 60000);
-        countdownEl.textContent = `${nextPrayer}: ${hours}j ${minutes}m lagi`;
-    }
+    tick();
+    setInterval(tick, 1000);
 }

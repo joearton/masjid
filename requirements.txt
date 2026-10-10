@@ -7,3 +7,5 @@ hijridate>=2.6.0
 python-dotenv>=1.0.0
 pytz>=2024.2
 currency-symbols>=2.0.3
+djangorestframework>=3.15.2
+drf-spectacular>=0.28.0

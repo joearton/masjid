@@ -1,0 +1,30 @@
+{% extends "panel/form.html" %}
+{% load i18n %}
+
+{% block panel_content %}
+{{ block.super }}
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white py-3">
+        <h5 class="card-title mb-0 fw-bold">{% trans "Pratinjau 7 hari" %}</h5>
+        <small class="text-muted">{% trans "Jadwal yang tampil di situs dan layar display dengan pengaturan tersimpan." %}</small>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm mb-0 align-middle">
+            <thead class="table-light"><tr>
+                <th class="ps-3">{% trans "Tanggal" %}</th><th>{% trans "Imsak" %}</th><th>{% trans "Subuh" %}</th><th>{% trans "Terbit" %}</th>
+                <th>{% trans "Dzuhur" %}</th><th>{% trans "Ashar" %}</th><th>{% trans "Maghrib" %}</th><th>{% trans "Isya" %}</th><th>{% trans "Sumber" %}</th>
+            </tr></thead>
+            <tbody>
+            {% for j in jadwal_preview %}
+                <tr>
+                    <td class="ps-3 fw-semibold">{{ j.tanggal|date:"D, d M" }}</td>
+                    <td>{{ j.imsak|time:"H:i" }}</td><td>{{ j.subuh|time:"H:i" }}</td><td>{{ j.terbit|time:"H:i" }}</td>
+                    <td>{{ j.dzuhur|time:"H:i" }}</td><td>{{ j.ashar|time:"H:i" }}</td><td>{{ j.maghrib|time:"H:i" }}</td><td>{{ j.isya|time:"H:i" }}</td>
+                    <td>{% if j.sumber == 'kemenag' %}<span class="badge text-bg-success">Kemenag</span>{% else %}<span class="badge text-bg-secondary">{% trans "Hisab" %}</span>{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,13 +1,17 @@
 {% load i18n %}
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="{% trans 'Menu panel' %}">
     <div class="sidebar-header">
-        <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-building fs-4 text-warning"></i>
-            <div>
-                <div class="fw-bold text-white small">{{ SITE_NAME }}</div>
-                <div class="text-muted" style="font-size:0.7rem">{% trans "Panel Admin" %}</div>
-            </div>
-        </div>
+        <a href="{% url 'panel:dashboard' %}" class="d-flex align-items-center gap-2 text-decoration-none">
+            {% if site_setting and site_setting.logo %}
+            <span class="brand-mark has-logo"><img src="{{ site_setting.logo.url }}" alt=""></span>
+            {% else %}
+            <span class="brand-mark"><i class="bi bi-moon-stars-fill" aria-hidden="true"></i></span>
+            {% endif %}
+            <span class="min-w-0">
+                <span class="d-block fw-bold text-white small text-truncate" style="max-width:170px">{{ SITE_NAME }}</span>
+                <span class="d-block" style="font-size:.7rem;color:rgba(255,255,255,.5)">{% trans "Panel Admin" %}</span>
+            </span>
+        </a>
     </div>
 
     <div class="sidebar-body">
@@ -67,8 +71,10 @@
         <a href="{% url 'core:home' %}" class="sidebar-link" target="_blank">
             <i class="bi bi-globe"></i> {% trans "Lihat Website" %}
         </a>
-        <a href="{% url 'panel:logout' %}" class="sidebar-link text-danger">
-            <i class="bi bi-box-arrow-right"></i> {% trans "Keluar" %}
-        </a>
+        <form method="post" action="{% url 'panel:logout' %}" class="m-0">{% csrf_token %}
+            <button type="submit" class="sidebar-link text-danger border-0 bg-transparent w-100 text-start">
+                <i class="bi bi-box-arrow-right"></i> {% trans "Keluar" %}
+            </button>
+        </form>
     </div>
 </nav>

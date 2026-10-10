@@ -3,13 +3,13 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 from django.db.models import Sum, Q
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils import timezone
 import datetime
 import json
 
 from apps.core.mixins import (
-    PublicListView, PanelListView,
-    PanelCreateView, PanelUpdateView, PanelDeleteView
+    PanelListView, PanelCreateView, PanelUpdateView, PanelDeleteView,
+    StaffRequiredMixin,
 )
 from .models import TransaksiKeuangan, KategoriKeuangan
 from .forms import TransaksiKeuanganForm, KategoriKeuanganForm
@@ -21,6 +21,19 @@ NAMA_BULAN = [
 ]
 
 
+def _js(value):
+    """JSON aman untuk disisipkan di dalam <script>."""
+    return json.dumps(value).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
+
+
+def _int_param(value, default, lo, hi):
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return default
+    return number if lo <= number <= hi else default
+
+
 # ─── Public Views ────────────────────────────────────────────────────────────
 
 class KeuanganPublicView(TemplateView):
@@ -29,9 +42,9 @@ class KeuanganPublicView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = _('Laporan Keuangan')
-        today = datetime.date.today()
-        bulan = int(self.request.GET.get('bulan', today.month))
-        tahun = int(self.request.GET.get('tahun', today.year))
+        today = timezone.localdate()
+        bulan = _int_param(self.request.GET.get('bulan'), today.month, 1, 12)
+        tahun = _int_param(self.request.GET.get('tahun'), today.year, 1900, 9999)
 
         transaksi = TransaksiKeuangan.objects.filter(
             tanggal__year=tahun, tanggal__month=bulan
@@ -100,7 +113,7 @@ class PanelTransaksiList(PanelListView):
         context['selected_jenis'] = self.request.GET.get('jenis', '')
 
         # Year & Month filter context
-        today = datetime.date.today()
+        today = timezone.localdate()
         selected_tahun = self.request.GET.get('tahun', '')
         selected_bulan = self.request.GET.get('bulan', '')
         context['selected_tahun'] = selected_tahun
@@ -144,7 +157,7 @@ class PanelTransaksiDelete(PanelDeleteView):
 
 # ─── Report View ─────────────────────────────────────────────────────────────
 
-class PanelKeuanganReport(LoginRequiredMixin, TemplateView):
+class PanelKeuanganReport(StaffRequiredMixin, TemplateView):
     template_name = 'panel/keuangan/report.html'
     login_url = '/panel/login/'
 
@@ -152,7 +165,7 @@ class PanelKeuanganReport(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['page_title'] = _('Laporan Keuangan')
 
-        today = datetime.date.today()
+        today = timezone.localdate()
         try:
             tahun = int(self.request.GET.get('tahun', today.year))
         except (ValueError, TypeError):
@@ -182,9 +195,9 @@ class PanelKeuanganReport(LoginRequiredMixin, TemplateView):
             monthly_masuk.append(float(masuk))
             monthly_keluar.append(float(keluar))
 
-        context['chart_labels'] = json.dumps(monthly_labels)
-        context['chart_masuk'] = json.dumps(monthly_masuk)
-        context['chart_keluar'] = json.dumps(monthly_keluar)
+        context['chart_labels'] = _js(monthly_labels)
+        context['chart_masuk'] = _js(monthly_masuk)
+        context['chart_keluar'] = _js(monthly_keluar)
 
         # ── Totals for the year ──
         qs_year = TransaksiKeuangan.objects.filter(tanggal__year=tahun).select_related('kategori')
@@ -207,10 +220,10 @@ class PanelKeuanganReport(LoginRequiredMixin, TemplateView):
             .annotate(total=Sum('jumlah'))
             .order_by('-total')
         )
-        context['kat_masuk_labels'] = json.dumps([k['kategori__nama'] for k in kategori_masuk])
-        context['kat_masuk_data'] = json.dumps([float(k['total']) for k in kategori_masuk])
-        context['kat_keluar_labels'] = json.dumps([k['kategori__nama'] for k in kategori_keluar])
-        context['kat_keluar_data'] = json.dumps([float(k['total']) for k in kategori_keluar])
+        context['kat_masuk_labels'] = _js([k['kategori__nama'] for k in kategori_masuk])
+        context['kat_masuk_data'] = _js([float(k['total']) for k in kategori_masuk])
+        context['kat_keluar_labels'] = _js([k['kategori__nama'] for k in kategori_keluar])
+        context['kat_keluar_data'] = _js([float(k['total']) for k in kategori_keluar])
 
         # ── Monthly detail table ──
         monthly_detail = []

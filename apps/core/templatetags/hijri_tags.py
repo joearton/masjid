@@ -17,6 +17,8 @@ from django import template
 from hijridate import Gregorian
 import datetime
 
+from django.utils import timezone
+
 register = template.Library()
 
 # Indonesian names for Hijri months
@@ -52,6 +54,8 @@ def _to_date(value):
     if value is None:
         return None
     if isinstance(value, datetime.datetime):
+        if timezone.is_aware(value):
+            value = timezone.localtime(value)
         return value.date()
     if isinstance(value, datetime.date):
         return value
@@ -134,7 +138,7 @@ def hijri_year(value):
 @register.simple_tag
 def hijri_today():
     """Return today's Hijri date string: '2 Ramadan 1447 H'"""
-    today = datetime.date.today()
+    today = timezone.localdate()
     h = Gregorian(today.year, today.month, today.day).to_hijri()
     month_name = HIJRI_MONTHS_ID.get(h.month, h.month_name())
     return f"{h.day} {month_name} {h.year} H"
@@ -143,7 +147,7 @@ def hijri_today():
 @register.simple_tag
 def hijri_today_full():
     """Return today's full Hijri date: 'Kamis, 2 Ramadan 1447 H'"""
-    today = datetime.date.today()
+    today = timezone.localdate()
     h = Gregorian(today.year, today.month, today.day).to_hijri()
     day_id = HARI_ID.get(h.day_name(), h.day_name())
     month_name = HIJRI_MONTHS_ID.get(h.month, h.month_name())
