@@ -173,12 +173,25 @@ class Keuangan(s.Serializer):
     web_url = s.URLField()
 
 
+class DefaultLocation(s.Serializer):
+    jenis = s.ChoiceField(['masjid', 'kota'], help_text='masjid = lokasi masjid; kota = kab/kota Kemenag kota_id')
+    kota_id = s.CharField(allow_null=True, help_text='Kode kab/kota Kemenag (hanya jenis=kota); pakai ?kota=')
+
+
 class JadwalSholatInfo(s.Serializer):
     sumber = Choice()
     lokasi = s.CharField(allow_null=True)
     latitude = s.FloatField()
     longitude = s.FloatField()
     timezone = s.CharField()
+    default_location = DefaultLocation(help_text='Lokasi jadwal bawaan selama pengguna belum memilih sendiri')
+
+
+class Pengumuman(s.Serializer):
+    text = s.CharField()
+    url = s.URLField(allow_null=True)
+    tone = s.ChoiceField(['info', 'warning'])
+    until = s.DateTimeField(allow_null=True, help_text='Tampil sampai; null = sampai teks dihapus')
 
 
 class Meta(s.Serializer):
@@ -191,7 +204,10 @@ class Meta(s.Serializer):
     today = s.DateField()
     hijriah = s.CharField()
     jadwal_sholat = JadwalSholatInfo()
-    features = s.DictField(child=s.BooleanField(), help_text='{keuangan, donasi}')
+    features = s.DictField(child=s.BooleanField(),
+                           help_text='{jadwal, jumat, kegiatan, berita, keuangan, donasi, profil}; '
+                                     'false = sembunyikan bagian itu. Kunci tak dikenal abaikan, tidak ada = true')
+    pengumuman = Pengumuman(allow_null=True, help_text='Banner pengumuman masjid (tab Jadwal); null = tidak ada')
     links = s.DictField(child=s.URLField(), help_text='{web, jadwal_sholat, cetak_jadwal, display}')
 
 

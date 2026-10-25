@@ -130,6 +130,34 @@ class SiteSetting(models.Model):
         _('Tampilkan Tombol Donasi'), default=False,
     )
 
+    # ─── Aplikasi MyUMKO (GET /api/mobile/v1/meta/) ──────────────
+    # Bagian masjid di aplikasi & web MyUMKO; keuangan/donasi memakai sakelar di atas.
+    myumko_jadwal = models.BooleanField(_('MyUMKO: tampilkan jadwal sholat'), default=True)
+    myumko_jumat = models.BooleanField(_('MyUMKO: tampilkan info sholat Jumat'), default=True)
+    myumko_kegiatan = models.BooleanField(_('MyUMKO: tampilkan kegiatan'), default=True)
+    myumko_berita = models.BooleanField(_('MyUMKO: tampilkan berita'), default=True)
+    myumko_profil = models.BooleanField(_('MyUMKO: tampilkan profil masjid'), default=True)
+    LOKASI_MASJID, LOKASI_KOTA = 'masjid', 'kota'
+    myumko_lokasi_bawaan = models.CharField(
+        _('MyUMKO: lokasi jadwal bawaan'), max_length=10, default=LOKASI_MASJID,
+        choices=[(LOKASI_MASJID, _('Lokasi masjid')), (LOKASI_KOTA, _('Kab/kota tertentu'))],
+        help_text=_('Dipakai aplikasi selama pengguna belum memilih lokasi sendiri.'),
+    )
+    myumko_kota_bawaan = models.CharField(
+        _('MyUMKO: kode kab/kota Kemenag'), max_length=10, blank=True,
+        help_text=_('Wajib bila lokasi bawaan = kab/kota tertentu (lihat /api/mobile/v1/sholat/kota/).'),
+    )
+    myumko_pengumuman = models.CharField(_('MyUMKO: teks pengumuman'), max_length=300, blank=True)
+    myumko_pengumuman_url = models.URLField(_('MyUMKO: tautan pengumuman'), blank=True)
+    myumko_pengumuman_nada = models.CharField(
+        _('MyUMKO: nada pengumuman'), max_length=10, default='info',
+        choices=[('info', _('Informasi')), ('warning', _('Peringatan'))],
+    )
+    myumko_pengumuman_sampai = models.DateTimeField(
+        _('MyUMKO: pengumuman tampil sampai'), null=True, blank=True,
+        help_text=_('Kosongkan agar tampil terus sampai teksnya dihapus.'),
+    )
+
     # ─── Donasi / Rekening ───────────────────────────────────────
     donasi_teks = models.CharField(
         _('Teks Ajakan Donasi'), max_length=300, blank=True,

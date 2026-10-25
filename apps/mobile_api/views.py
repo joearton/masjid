@@ -181,6 +181,23 @@ def unavailable():
 
 
 # ------------------------------------------------------------------ layanan
+def _default_location(site):
+    """Lokasi jadwal bawaan aplikasi MyUMKO selama pengguna belum memilih: masjid atau kab/kota Kemenag."""
+    if site.myumko_lokasi_bawaan == SiteSetting.LOKASI_KOTA and site.myumko_kota_bawaan:
+        return {'jenis': 'kota', 'kota_id': site.myumko_kota_bawaan}
+    return {'jenis': 'masjid', 'kota_id': None}
+
+
+def _pengumuman(site):
+    """Pengumuman masjid untuk MyUMKO; ``None`` bila kosong atau sudah lewat ``until``."""
+    text = (site.myumko_pengumuman or '').strip()
+    until = site.myumko_pengumuman_sampai
+    if not text or (until and until <= timezone.now()):
+        return None
+    return {'text': text, 'url': site.myumko_pengumuman_url or None, 'tone': site.myumko_pengumuman_nada,
+            'until': until.isoformat() if until else None}
+
+
 class MetaView(MobileAPIView):
     @extend_schema(tags=['Layanan'], summary='Informasi layanan masjid', responses=sz.Meta, operation_id='meta',
                    description='Panggil saat fitur Masjid dibuka: nama, alamat, tautan, dan sumber jadwal sholat.')
@@ -203,11 +220,18 @@ class MetaView(MobileAPIView):
                 'latitude': sholat.latitude,
                 'longitude': sholat.longitude,
                 'timezone': sholat.timezone,
+                'default_location': _default_location(site),
             },
             'features': {
+                'jadwal': site.myumko_jadwal,
+                'jumat': site.myumko_jumat,
+                'kegiatan': site.myumko_kegiatan,
+                'berita': site.myumko_berita,
                 'keuangan': site.tampilkan_keuangan,
                 'donasi': site.tampilkan_donasi,
+                'profil': site.myumko_profil,
             },
+            'pengumuman': _pengumuman(site),
             'links': {
                 'web': public_base() + '/',
                 'jadwal_sholat': public_base() + '/sholat/',

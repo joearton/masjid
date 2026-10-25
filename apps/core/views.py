@@ -96,5 +96,10 @@ class PanelSiteSettingView(StaffRequiredMixin, UpdateView):
         return super().form_valid(form)
 
     def form_invalid(self, form):
+        labels = [str(form.fields[f].label) for f in form.errors if f in form.fields]
+        messages.error(self.request, _('Pengaturan belum tersimpan. Periksa: %s.') % ', '.join(labels or [_('isian')]))
+        return super().form_invalid(form)
+
+    def form_invalid(self, form):
         messages.error(self.request, _('Terjadi kesalahan. Periksa kembali form Anda.'))
         return super().form_invalid(form)

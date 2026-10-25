@@ -119,6 +119,11 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-myumko" data-bs-toggle="tab" data-bs-target="#pane-myumko" type="button" role="tab">
+                <i class="bi bi-phone"></i>{% trans "MyUMKO" %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link" id="tab-seo" data-bs-toggle="tab" data-bs-target="#pane-seo" type="button" role="tab">
                 <i class="bi bi-search"></i>{% trans "SEO & Meta" %}
             </button>
@@ -349,6 +354,77 @@
                     {% endif %}
                     <input type="file" name="qris_image" class="form-control" accept="image/*">
                     {% if form.qris_image.help_text %}<div class="form-text">{{ form.qris_image.help_text }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════ MYUMKO ═══════ -->
+        <div class="tab-pane fade" id="pane-myumko" role="tabpanel">
+            <div class="setting-section shadow-sm">
+                <div class="setting-section-title">{% trans "Bagian Masjid di Aplikasi MyUMKO" %}</div>
+                <p class="text-muted small">{% trans "Berlaku untuk aplikasi Android dan web MyUMKO (my.umko.ac.id). Kas dan donasi mengikuti sakelar di tab Fitur." %}</p>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="id_myumko_jadwal" name="myumko_jadwal" {% if form.myumko_jadwal.value %}checked{% endif %}>
+                    <label class="form-check-label fw-semibold" for="id_myumko_jadwal">{{ form.myumko_jadwal.label }}</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="id_myumko_jumat" name="myumko_jumat" {% if form.myumko_jumat.value %}checked{% endif %}>
+                    <label class="form-check-label fw-semibold" for="id_myumko_jumat">{{ form.myumko_jumat.label }}</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="id_myumko_kegiatan" name="myumko_kegiatan" {% if form.myumko_kegiatan.value %}checked{% endif %}>
+                    <label class="form-check-label fw-semibold" for="id_myumko_kegiatan">{{ form.myumko_kegiatan.label }}</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="id_myumko_berita" name="myumko_berita" {% if form.myumko_berita.value %}checked{% endif %}>
+                    <label class="form-check-label fw-semibold" for="id_myumko_berita">{{ form.myumko_berita.label }}</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="id_myumko_profil" name="myumko_profil" {% if form.myumko_profil.value %}checked{% endif %}>
+                    <label class="form-check-label fw-semibold" for="id_myumko_profil">{{ form.myumko_profil.label }}</label>
+                </div>
+            </div>
+            <div class="setting-section shadow-sm">
+                <div class="setting-section-title">{% trans "Lokasi Jadwal Sholat Bawaan" %}</div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="{{ form.myumko_lokasi_bawaan.id_for_label }}">{{ form.myumko_lokasi_bawaan.label }}</label>
+                    {{ form.myumko_lokasi_bawaan }}
+                    {% if form.myumko_lokasi_bawaan.help_text %}<div class="form-text">{{ form.myumko_lokasi_bawaan.help_text }}</div>{% endif %}
+                    {% for e in form.myumko_lokasi_bawaan.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="{{ form.myumko_kota_bawaan.id_for_label }}">{{ form.myumko_kota_bawaan.label }}</label>
+                    {{ form.myumko_kota_bawaan }}
+                    {% if form.myumko_kota_bawaan.help_text %}<div class="form-text">{{ form.myumko_kota_bawaan.help_text }}</div>{% endif %}
+                    {% for e in form.myumko_kota_bawaan.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                </div>
+            </div>
+            <div class="setting-section shadow-sm">
+                <div class="setting-section-title">{% trans "Pengumuman Masjid" %}</div>
+                <p class="text-muted small">{% trans "Tampil sebagai banner di tab Jadwal MyUMKO. Kosongkan teks untuk menyembunyikan." %}</p>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="{{ form.myumko_pengumuman.id_for_label }}">{{ form.myumko_pengumuman.label }}</label>
+                    {{ form.myumko_pengumuman }}
+                    {% if form.myumko_pengumuman.help_text %}<div class="form-text">{{ form.myumko_pengumuman.help_text }}</div>{% endif %}
+                    {% for e in form.myumko_pengumuman.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="{{ form.myumko_pengumuman_url.id_for_label }}">{{ form.myumko_pengumuman_url.label }}</label>
+                    {{ form.myumko_pengumuman_url }}
+                    {% if form.myumko_pengumuman_url.help_text %}<div class="form-text">{{ form.myumko_pengumuman_url.help_text }}</div>{% endif %}
+                    {% for e in form.myumko_pengumuman_url.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="{{ form.myumko_pengumuman_nada.id_for_label }}">{{ form.myumko_pengumuman_nada.label }}</label>
+                    {{ form.myumko_pengumuman_nada }}
+                    {% if form.myumko_pengumuman_nada.help_text %}<div class="form-text">{{ form.myumko_pengumuman_nada.help_text }}</div>{% endif %}
+                    {% for e in form.myumko_pengumuman_nada.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="{{ form.myumko_pengumuman_sampai.id_for_label }}">{{ form.myumko_pengumuman_sampai.label }}</label>
+                    {{ form.myumko_pengumuman_sampai }}
+                    {% if form.myumko_pengumuman_sampai.help_text %}<div class="form-text">{{ form.myumko_pengumuman_sampai.help_text }}</div>{% endif %}
+                    {% for e in form.myumko_pengumuman_sampai.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
                 </div>
             </div>
         </div>
